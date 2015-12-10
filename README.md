@@ -1,5 +1,7 @@
 # dyfi-loc
-DYFI locator. Given a batch of DYFI entries (point intensities), determine the earthquake origin.
+DYFI locator. Given a batch of DYFI entries (point intensities), determine the earthquake origin. 
+
+The goal is to provide a solution (magnitude, location, time, uncertainty?) as a dyfi-loc product to PDL. This will be used by Hydra to help trigger smaller felt-but-underinstrumented events. Paul also discussed receiving TED location (which should always happen first) as the seed for starting this procedure and initial location.
 
 Procedure
 ---------
@@ -14,6 +16,7 @@ Procedure
 7. At each node, determine the magnitude with the smallest total residual.
 8. Select the node-magnitude combination with the smallest total residual. This is the preferred solution.
 9. Test the azimuthal coverage of the stations w.r.t. the solution, reject if insufficient coverage.
+10. Determine the time of origin using the initial entry time (or some computation of initial entry times)
 
 IPEs
 ----
