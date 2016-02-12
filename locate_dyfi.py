@@ -22,8 +22,8 @@ RESID_TYPE = 'B'
 
 # TODO: Make these parameters configurable
 
-xgridrange = range(-100,100,10)          # search grid in km
-ygridrange = range(-100,100,10)          # search grid in km
+xgridrange = range(-200,200,10)          # search grid in km
+ygridrange = range(-200,200,10)          # search grid in km
 magrange = [ x*0.1 for x in range(18,70) ]   # search parameters for magnitude
 
 def locate(pts):

@@ -1,8 +1,14 @@
 #! /usr/local/bin/python3
 
 """
-Given an event, run the locator continuously every 3 minutes 
-until all locations are used.
+Given an event, run the locator continuously every T_INTERVAL
+minutes until all locations are used.
+
+Input is a GeoJSON FeatureCollection of Point Features (individual
+DYFI observations). Each Point requires two properties:
+ 
+    'user_cdi'  calculated CDI of that entry
+    't'         entry time in seconds past origin time
 
 """
 
@@ -14,19 +20,19 @@ import locate_dyfi
 # INITIAL SETUP
 
 # TODO: Make these variables into CLI arguments
-T_INTERVAL = 60
-MIN_PTS_DIFF = 5
-T_MAX = 60 * 20
+T_INTERVAL = 60     # Run every T_INTERVAL seconds
+MIN_PTS_DIFF = 5    # Don't run if only this many more points since last run
+T_MAX = 60 * 20     # Stop running after this interval
 
 parser = argparse.ArgumentParser(
     description = 'Run the locator on an event')
 parser.add_argument('infile',
-                    help = 'inputfile (must be mysqldump)')
+    help = 'inputfile (must be GeoJSON FeatureCollection)')
 
 parser.add_argument('--iterations',
-                    type=int,
-                   help = 'optional number of iterations',
-                   default=0)
+    type=int,
+    help = 'optional number of iterations',
+    default=0)
 
 try:
     args = parser.parse_args()
@@ -78,7 +84,8 @@ while (lastrun_npts < npts and t < T_MAX):
 
     iterations += 1
     best_result = False
-    print('%i: Running otime + %i mins (%i entries)...' % (iterations,t/60,this_npts))
+    print('%i: Running otime + %i mins (%i entries)...' %
+        (iterations,t/60,this_npts))
     result = locate_dyfi.locate(this_pts)
     
     # TODO: Use GeoJSON property methods for this
