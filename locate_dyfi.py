@@ -4,8 +4,9 @@
 Given a list of geojson points, iterate over them and determine
 the best location
 
-Ver. A: Compute residuals of intensity
-Ver. B: Compute residuals of magnitude
+Ver. A: Compute residuals of intensity (previous Locator algorithm)
+Ver. B: Compute residuals of magnitude (conforms to B&W algorithm)
+
 """
 
 import sys
@@ -18,6 +19,8 @@ from geopy.distance import great_circle
 import ipes
 
 ipe = ipes.aww2014
+# Resid type A = residuals of intensities at each observation
+# Resid type B = residuals of magnitudes at each observation
 RESID_TYPE = 'B'
 
 # TODO: Make these parameters configurable
