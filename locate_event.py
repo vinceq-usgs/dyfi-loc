@@ -19,20 +19,30 @@ import locate_dyfi
 
 # INITIAL SETUP
 
-# TODO: Make these variables into CLI arguments
-T_INTERVAL = 60     # Run every T_INTERVAL seconds
-MIN_PTS_DIFF = 5    # Don't run if only this many more points since last run
-T_MAX = 60 * 20     # Stop running after this interval
-
 parser = argparse.ArgumentParser(
     description = 'Run the locator on an event')
 parser.add_argument('infile',
     help = 'inputfile (must be GeoJSON FeatureCollection)')
-
 parser.add_argument('--iterations',
-    type=int,
-    help = 'optional number of iterations',
-    default=0)
+    type = int,
+    metavar = '',
+    help = 'run n iterations (0 = run until done)',
+    default = 0)
+parser.add_argument('--interval',
+    type = int,
+    metavar = '',
+    help = 'run iterations every n seconds',
+    default = 60)
+parser.add_argument('--ptdiff',
+    type = int,
+    metavar = '',
+    help = "skip unless there's n or more new points since last run",
+    default = 5)
+parser.add_argument('--maxtime',
+    type = int,
+    metavar = '',
+    help = 'stop n seconds after first entry',
+    default = 60 * 20)
 
 try:
     args = parser.parse_args()
@@ -73,14 +83,14 @@ iterations = 0      # Number of iterations of locator algorithm
 t = 0               # Now computing location for first t seconds of event
 allresults=[]
 
-while (lastrun_npts < npts and t < T_MAX):
-    t += T_INTERVAL
+while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
+    t += args.interval
 
     # Create a new datapts that only has the entries in the time window
     
     this_pts = [ pt for pt in allpts if pt['properties']['t'] <= t ]
     this_npts = len(this_pts)
-    if this_npts <= lastrun_npts + MIN_PTS_DIFF: continue
+    if this_npts <= lastrun_npts + args.ptdiff: continue
 
     iterations += 1
     best_result = False
