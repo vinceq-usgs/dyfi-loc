@@ -1,6 +1,11 @@
 #! /usr/local/bin/python3
+# -*- coding: utf-8 -*-
 
 """
+Created on Wed Feb 10 17:51:20 2016
+
+@author: vinceq
+
 Given a list of geojson points, iterate over them and determine
 the best location
 
@@ -9,8 +14,6 @@ Ver. B: Compute residuals of magnitude (conforms to B&W algorithm)
 
 """
 
-import sys
-import copy
 import math
 import json
 from geojson import Point,Feature
@@ -103,7 +106,6 @@ def get_offset_Point(initloc,ix,iy):
     iy          y-offset in km (positive is North)
     """
     
-    # TODO: Implement this as a Point object method
     lat0 = float(initloc['geometry']['coordinates'][1])
     lon0 = float(initloc['geometry']['coordinates'][0])
     lat = lat0 + (iy / 111.12)
@@ -203,14 +205,13 @@ def find_dist(pts,loc):
     """
     Iterate through all observations and calculate distance to loc
     Also calculates distance-based weight (see BW1997)
-    (Internal function only)
+    Returns number of points calculated
     
     Arguments:
     pts    geojson feature collection (list of GeoJSON points)
     loc    geojson point (dict)
     """
     
-    # TODO: Implement loc as Point object method
     counter = 0    
     lat0 = loc['coordinates'][1]
     lon0 = loc['coordinates'][0]

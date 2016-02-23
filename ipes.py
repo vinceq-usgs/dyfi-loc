@@ -15,8 +15,7 @@ def aww2014(mag,r,inverse):
     Implementation of Atkinson, Worden, Wald (2014)
     Returns intensity = f(mag,r)
     
-    
-    If inverse, returns mag = f(intensity,r,True)
+    If inverse is true, returns mag = f(intensity,r)
     """
     
     R = math.sqrt(r**2 + 14**2)

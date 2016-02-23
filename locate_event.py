@@ -1,6 +1,10 @@
 #! /usr/local/bin/python3
 
 """
+Created on Wed Feb 10 17:51:20 2016
+
+@author: vinceq
+
 Given an event, run the locator continuously every T_INTERVAL
 minutes until all locations are used.
 
@@ -25,28 +29,29 @@ parser.add_argument('infile',
     help = 'inputfile (must be GeoJSON FeatureCollection)')
 parser.add_argument('--iterations',
     type = int,
-    metavar = '',
+    metavar = 'n',
     help = 'run n iterations (0 = run until done)',
     default = 0)
 parser.add_argument('--interval',
     type = int,
-    metavar = '',
-    help = 'run iterations every n seconds',
+    metavar = 't',
+    help = 'run iterations every t seconds (default 60)',
     default = 60)
 parser.add_argument('--ptdiff',
     type = int,
-    metavar = '',
-    help = "skip unless there's n or more new points since last run",
+    metavar = 'n',
+    help = "skip unless there's n+ new points since last run (default 5)",
     default = 5)
 parser.add_argument('--maxtime',
     type = int,
-    metavar = '',
-    help = 'stop n seconds after first entry',
+    metavar = 't',
+    help = 'stop t seconds after first entry (default 1200)',
     default = 60 * 20)
 
 try:
     args = parser.parse_args()
 except:
+    print('Exiting...')
     sys.exit()
     
 if args.iterations: 
@@ -114,6 +119,7 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
         json.dump(allgeojson, outfile)
         
 print(allresults)
+print('Done.')
 
 
         
