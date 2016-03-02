@@ -20,6 +20,7 @@ import argparse
 import os.path
 import sys
 import json
+from copy import copy
 from modules import locate_dyfi
 
 # INITIAL SETUP
@@ -121,9 +122,15 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     lastrun_npts = this_npts
     if args.iterations and iterations >= args.iterations: lastrun_npts = npts
 
-    # Save each iteration to file just in case we are interrupted
+    # Create a new copy of allresults so we can append the real epicenter
+    solutions = copy(allresults)
+    solutions.append(evdata)
 
-    allgeojson = { 'type': 'FeatureCollection', 'features' : allresults }
+    # Overwrite the output file at each step. It should be usable even
+    # if processing is interrupted.
+
+    allgeojson = { 'type': 'FeatureCollection', 'features' : solutions }
+    
     with open(outfilename, 'w') as outfile:
         json.dump(allgeojson, outfile)
         
