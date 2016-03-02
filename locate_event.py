@@ -17,9 +17,10 @@ DYFI observations). Each Point requires two properties:
 """
 
 import argparse
+import os.path
 import sys
 import json
-import locate_dyfi
+from modules import locate_dyfi
 
 # INITIAL SETUP
 
@@ -47,6 +48,10 @@ parser.add_argument('--maxtime',
     metavar = 't',
     help = 'stop t seconds after first entry (default 1200)',
     default = 60 * 20)
+parser.add_argument('--outputfile',
+    type = str,
+    metavar = 's',
+    help = 'output file (default is "output/out.[inputfile]")')
 
 try:
     args = parser.parse_args()
@@ -60,12 +65,16 @@ else:
     print('Running through all entries.')
     args.iterations
 
+outfilename = 'output/out.' + os.path.basename(args.infile)
+if args.outputfile:
+    print('Using output file %s.' % args.outputfile)
+    outfilename = args.outputfile
+
 # DONE INITIAL SETUP
 
 # Load data
 
 data = json.load(open(args.infile))
-outfilename = 'out.' + args.infile
 allpts = data['features']
 
 # Extract epicenter data
