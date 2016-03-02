@@ -28,6 +28,7 @@ RESID_TYPE = 'B'
 
 # TODO: Make these parameters configurable
 
+PRECISION = 4
 xgridrange = range(-200,200,10)          # search grid in km
 ygridrange = range(-200,200,10)          # search grid in km
 magrange = [ x*0.1 for x in range(18,70) ]   # search parameters for magnitude
@@ -110,6 +111,8 @@ def get_offset_Point(initloc,ix,iy):
     lon0 = float(initloc['geometry']['coordinates'][0])
     lat = lat0 + (iy / 111.12)
     lon = lon0 + (ix / 111.12) * math.cos(lat * 0.0174532925);
+    lat = round(lat,PRECISION)
+    lon = round(lon,PRECISION)
     result = Point((lon,lat))
     return result
     
@@ -152,7 +155,8 @@ def trylocation_A(loc,pts):
             bestmag = trymag
             bestresid2 = totalresid2
             
-    results = { 'mag': bestmag, 'resid' : math.sqrt(bestresid2) }
+    resid = round(math.sqrt(bestresid2),PRECISION)
+    results = { 'mag': bestmag, 'resid' : resid }
     return results
  
 def trylocation_B(loc,pts):
@@ -182,7 +186,6 @@ def trylocation_B(loc,pts):
         dist = pt['properties']['_dist']
         trymag = ipe(ii,dist,True)
 
-        
         wt = pt['properties']['_wt']
         pt['properties']['_mag'] = trymag        
         totalmag += wt*trymag
@@ -197,8 +200,8 @@ def trylocation_B(loc,pts):
         resid2 = wt * (meanmag - mag)**2
         totalresid2 += resid2
     
-    bestresid2 = totalresid2 / totalwt2
-    results = { 'mag': meanmag, 'resid' : math.sqrt(bestresid2) }
+    resid = math.sqrt(totalresid2 / totalwt2)
+    results = { 'mag': round(meanmag,1), 'resid' : round(resid,PRECISION) }
     return results
        
 def find_dist(pts,loc):
@@ -225,6 +228,8 @@ def find_dist(pts,loc):
         else:
             wt = 0.1 + math.cos(math.pi/2*dist/150)
 
+        dist = round(dist,PRECISION)
+        wt = round(wt,PRECISION)
         pt['properties']['_dist'] = dist
         pt['properties']['_wt'] = wt        
         counter += 1
