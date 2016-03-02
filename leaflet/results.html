@@ -11,14 +11,106 @@
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
     <script src="http://calvinmetcalf.github.io/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
 </head>
+
 <body>
+    <script>
+// Keep functions in this section
+
+        var solutions;
+ 
+        function initmap() {
+// set up the map
+            map = new L.Map('map');
+
+// create the tile layer with correct attribution
+            var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+            var osm = new L.TileLayer(osmUrl, {minZoom: 6, maxZoom: 12, attribution: osmAttrib});		
+
+// start the map in Southern California
+            map.setView([34.0, -118.0],8);
+            map.addLayer(osm);
+        }
+
+       function loadData(evid) {
+            inputname = 'data/solutions.' + evid + '.js';
+            $.getScript(inputname,onLoadSolution);
+        }
+
+        function updatetimelegend() {
+            var d = new Date();
+            var datestring = d.toJSON();
+            document.title = datestring;
+        }
+
+        function printData(data) {
+            var out = "";
+            var i;
+            console.log('Now in printData.')
+            for (i = 0; i < data.length; i++) {
+                out = data[i].lat + ',' + data[i].lon;
+                console.log(out);
+            }
+        } 
+
+        function onLoadSolution() {
+// Assumes solutionsData has been populated
+            data = solutionsData;
+            solutionArray = [];
+            markerOption = {};
+
+            for (i=0; i<data.features.length; i++) {
+                solution = data.features[i];
+                console.log(solution);
+                isEpicenter = solution.properties.is_epicenter;
+                if (isEpicenter) {
+                    markerOption = {
+                        color : '#f00',
+                        radius : 10,
+                        fillOpacity : 1,
+                    };
+                }
+                else {
+                    markerOption = {
+                        color : '#88f',
+                        radius : 8,
+                        fillOpacity : 1,
+                    };  
+                }          
+
+                ptLayer = L.geoJson(solution, {
+                    pointToLayer: function (feature, latlon) {
+                        return L.circleMarker(latlon, markerOption);
+                    }
+                });
+            
+                solutionArray.push(ptLayer);
+            }
+            solutionLayer = L.layerGroup(solutionArray);
+            solutionLayer.addTo(map);
+
+//            solutionsLayer = L.geoJson(solutions);
+//            console.log(solutions);
+//           printData(solutions.features);
+
+//            solutionsLayer.addTo(map);
+
+//            map.fitBounds(solutionsLayer.getBounds(),{ padding: [30,30]} );
+
+            console.log('Finished plotting ' + evid + '.');
+        }
+    </script>
     <div id="map" style="width: 600px; height: 600px"></div>
 
-    <script src="results.js"></script>
+    <script type="text/javascript">
 
-    <script>
         initmap();
-        var raw = new L.GeoJSON.AJAX("/output/out.nc72282711.geojson");
+        evid = 'test';
+
+        loadData('test');
+        
+//        inputname = 'data/solutions.' + evid + '.js';
+//        $.getScript(inputname,onload(evid));
 
         var geojsonMarker = {
             radius : 8,
@@ -28,13 +120,7 @@
             opacity : 1,
             fillOpacity: 0.8
         };
-
-        var solutionsLayer = raw;
-        document.write(raw);
-        console.log(raw);
-        solutionsLayer.addTo(map);
-        
-        
+       
         
 	</script>
 </body>
