@@ -1,0 +1,4 @@
+To test the Leaflet DYFI viewer:
+1. cd to this directory
+2. run './httpserver &'
+3. point browser to 'http://localhost:8000'

@@ -25,7 +25,7 @@
 // create the tile layer with correct attribution
             var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
             var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-            var osm = new L.TileLayer(osmUrl, {minZoom: 6, maxZoom: 12, attribution: osmAttrib});		
+            var osm = new L.TileLayer(osmUrl, {minZoom: 4, maxZoom: 16, attribution: osmAttrib});		
 
 // start the map in Southern California
             map.setView([34.0, -118.0],8);
@@ -56,47 +56,73 @@
         function onLoadSolution() {
 // Assumes solutionsData has been populated
             data = solutionsData;
-            solutionArray = [];
-            markerOption = {};
+            circleArray = [];
+            lineArray = [];
 
             for (i=0; i<data.features.length; i++) {
                 solution = data.features[i];
-                console.log(solution);
+                p = solution.properties;
+
+                var popuptext;
+                markerOption = {};
                 isEpicenter = solution.properties.is_epicenter;
                 if (isEpicenter) {
+                    popuptext = "Real epicenter: M" + p.mag;
                     markerOption = {
                         color : '#f00',
-                        radius : 10,
+                        radius : 6,
                         fillOpacity : 1,
                     };
                 }
                 else {
+                    popuptext = "t: " + p.t + " (" + p.npts + " pts)<br>"
+                        + "M" + p.mag + "<br>resid: " + p.resid; 
                     markerOption = {
-                        color : '#88f',
-                        radius : 8,
-                        fillOpacity : 1,
+                        color : '#00f',
+                        radius : 4,
+                        fillOpacity : 0,
                     };  
+
+                    // Have to reverse this since geojson format is (lon,lat)
+                    // and leaflet format is (lat,lon)
+                    coords = solution.geometry.coordinates.slice().reverse();
+                    lineArray.push(coords);
                 }          
+
+// Add to solution points layer
 
                 ptLayer = L.geoJson(solution, {
                     pointToLayer: function (feature, latlon) {
                         return L.circleMarker(latlon, markerOption);
-                    }
-                });
-            
-                solutionArray.push(ptLayer);
+                    },
+                }).bindPopup(popuptext);
+                circleArray.push(ptLayer);
+
             }
-            solutionLayer = L.layerGroup(solutionArray);
+
+// Now plot solutions
+
+            solutionLayer = L.featureGroup(circleArray);
             solutionLayer.addTo(map);
+            map.fitBounds(solutionLayer.getBounds());
+ 
+// Now plot lines
+            console.log(lineArray);
+            lineLayer = L.polyline(lineArray,
+                {
+                    color:'blue',
+                    weight:2,
+                    opacity:0.5,
+                    dashArray:'10,10',
+                }
+            ).addTo(map);
 
-//            solutionsLayer = L.geoJson(solutions);
-//            console.log(solutions);
-//           printData(solutions.features);
+// Add control checkboxes 
 
-//            solutionsLayer.addTo(map);
-
-//            map.fitBounds(solutionsLayer.getBounds(),{ padding: [30,30]} );
-
+            L.control.layers({},{
+               'Solutions':solutionLayer,
+                'Lines':lineLayer,
+            }).addTo(map);
             console.log('Finished plotting ' + evid + '.');
         }
     </script>

@@ -1,2 +1,2 @@
 # Run this command to set up localhost:8000
-/anaconda/bin/python3 -m http.server &
+/anaconda/bin/python3 -m http.server 

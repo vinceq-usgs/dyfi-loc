@@ -134,6 +134,9 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     with open(outfilename, 'w') as outfile:
         json.dump(allgeojson, outfile)
         
+    # TODO: Also write output with a "solutionsData = ..." wrapper to
+    # leaflet/data/solutions.evid.js
+        
 print(allresults)
 print('Done.')
 
