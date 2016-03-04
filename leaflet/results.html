@@ -14,6 +14,14 @@
 
 <body>
     <script>
+
+// Graphics definitions
+
+        var epicenterIcon = L.icon({
+            iconUrl : "images/star.png",
+            iconSize : 16,
+        });
+
 // Keep functions in this section
 
         var solutions;
@@ -56,7 +64,7 @@
         function onLoadSolution() {
 // Assumes solutionsData has been populated
             data = solutionsData;
-            circleArray = [];
+            solutionsArray = [];
             lineArray = [];
 
             for (i=0; i<data.features.length; i++) {
@@ -64,15 +72,15 @@
                 p = solution.properties;
 
                 var popuptext;
-                markerOption = {};
+                var ptLayer;
                 isEpicenter = solution.properties.is_epicenter;
                 if (isEpicenter) {
                     popuptext = "Real epicenter: M" + p.mag;
-                    markerOption = {
-                        color : '#f00',
-                        radius : 6,
-                        fillOpacity : 1,
-                    };
+                    ptLayer = L.geoJson(solution, {
+                        pointToLayer: function(feature,latlon) {
+                            return L.marker(latlon, { icon:epicenterIcon});
+                        }
+                    });
                 }
                 else {
                     popuptext = "t: " + p.t + " (" + p.npts + " pts)<br>"
@@ -82,7 +90,14 @@
                         radius : 4,
                         fillOpacity : 0,
                     };  
-
+                    ptLayer = L.geoJson(solution, {
+                        pointToLayer: function(feature,latlon) {
+                            return L.circleMarker(latlon, markerOption);
+                        }
+                    });
+                    
+                    
+                    // Also draw intra-solution path
                     // Have to reverse this since geojson format is (lon,lat)
                     // and leaflet format is (lat,lon)
                     coords = solution.geometry.coordinates.slice().reverse();
@@ -91,18 +106,14 @@
 
 // Add to solution points layer
 
-                ptLayer = L.geoJson(solution, {
-                    pointToLayer: function (feature, latlon) {
-                        return L.circleMarker(latlon, markerOption);
-                    },
-                }).bindPopup(popuptext);
-                circleArray.push(ptLayer);
+                ptLayer.bindPopup(popuptext);
+                solutionsArray.push(ptLayer);
 
             }
 
 // Now plot solutions
 
-            solutionLayer = L.featureGroup(circleArray);
+            solutionLayer = L.featureGroup(solutionsArray);
             solutionLayer.addTo(map);
             map.fitBounds(solutionLayer.getBounds());
  
