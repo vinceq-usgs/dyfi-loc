@@ -7,10 +7,11 @@ Location Viewer
 ---------------
 
 To use the Location Viewer:
-0. Install this repository.
-1. Start a local HTTP server by entering 'cd leaflet; ./httpserver &'
-2. Point your browser to 'http://localhost:8000/results.html
-3. Use the Event Selector menu in the lower left corner to select an event.
+
+1. Install this repository.
+2. Start a local HTTP server by entering 'cd leaflet; ./httpserver &'
+3. Point your browser to 'http://localhost:8000/results.html
+4. Use the Event Selector menu in the lower left corner to select an event.
 
 Locator Algorithm
 ---------
@@ -19,23 +20,20 @@ Locator Algorithm
 3. Set up a search grid (possibly related to max int) centered on the initial location.
 4. Iterate over each node of the search grid.
 5. The next step depends on which residual calculation method is used.
-
-Version A (old Locator method):
-  a. Iterate over test magnitudes (and depths? depending on IPE):
-    1. Assume this node is a "test epicenter" with given magnitude. 
-    2. Iterate through each observation and calculate the estimated intensity.
-    3. Compare with the actual (observed) intensity at that location.
-    4. Sum up the weighted squared residuals of intensity.
-  b. The magnitude with the lowest residual is the "best" magnitude for this test epicenter.
-
-Version B (B&W method):
-  a. Iterate through each observation and calculate the magnitude what would result in this intensity.
-  b. Compare each calculated magnitude of each location with the weighted mean of the magnitudes in all locations.
-  c. Sum up the weighed variances in magnitude. That is the residual for this test epicenter.
-
-6. Select the node-magnitude combination with the smallest total residual. This is the preferred solution.
-7. Test the azimuthal coverage of the observations w.r.t. the solution, reject if insufficient coverage. (TODO)
-8. Determine the time of origin using the initial entry time (or some computation of initial entry times) (TODO)
+  - Version A (old Locator method):
+    1. Iterate over test magnitudes (and depths? depending on IPE):
+      1. Assume this node is a "test epicenter" with given magnitude. 
+      2. Iterate through each observation and calculate the estimated intensity.
+      3. Compare with the actual (observed) intensity at that location.
+      4. Sum up the weighted squared residuals of intensity.
+    2. The magnitude with the lowest residual is the "best" magnitude for this test epicenter.
+  - Version B (B&W method):
+    1. Iterate through each observation and calculate the magnitude what would result in this intensity.
+    2. Compare each calculated magnitude of each location with the weighted mean of the magnitudes in all locations.
+    3. Sum up the weighed variances in magnitude. That is the residual for this test epicenter.
+7. Select the node-magnitude combination with the smallest total residual. This is the preferred solution.
+8. Test the azimuthal coverage of the observations w.r.t. the solution, reject if insufficient coverage. (TODO)
+9. Determine the time of origin using the initial entry time (or some computation of initial entry times) (TODO)
 
 IPEs
 ----
@@ -43,13 +41,13 @@ Atkinson, Worden, and Wald (2014). Intensity Prediction Equations for North Amer
 
 Test events
 -----------
-ci37372672
-ci15520985
-ci14745580
-ci15296281
-ci15481673
-nc71996906
-nc72282711
+- ci37372672
+- ci15520985
+- ci14745580
+- ci15296281
+- ci15481673
+- nc71996906
+- nc72282711
 
 Time, load statistics and optimization
 -----------------------
