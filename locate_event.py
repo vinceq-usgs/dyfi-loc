@@ -17,6 +17,7 @@ DYFI observations). Each Point requires two properties:
 """
 
 import argparse
+import re
 import os.path
 import sys
 import json
@@ -79,12 +80,12 @@ data = json.load(open(args.infile))
 allpts = data['features']
 
 # Extract epicenter data
+# TODO: If evdata doesn't exist, handle it
+# TODO: Epicenter should have evid; right now, infer from input filename
 
 for i in range(0,len(allpts)):
     if 'is_epicenter' in allpts[i]['properties']: break
 
-# Extract epicenter data for checking later
-# TODO: If evdata doesn't exist, handle it
 
 evdata = allpts.pop(i)
 npts = len(allpts)
@@ -134,8 +135,14 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     with open(outfilename, 'w') as outfile:
         json.dump(allgeojson, outfile)
         
-    # TODO: Also write output with a "solutionsData = ..." wrapper to
+    # Also write output with a "solutionsData = ..." wrapper to
     # leaflet/data/solutions.evid.js
+    evid = os.path.basename(args.infile).split('.')[-2]
+    outfilename = 'leaflet/data/solutions.' + evid + '.js'
+    print('Writing to ' + outfilename)
+    with open(outfilename, 'w') as outfile:
+        outfile.write('solutionsData=');        
+        json.dump(allgeojson, outfile)
         
 print(allresults)
 print('Done.')

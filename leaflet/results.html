@@ -10,22 +10,103 @@
     <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
     <script src="http://calvinmetcalf.github.io/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+
+    <style>
+
+
+// D3 styles
+svg {
+  font: 10px sans-serif;
+}
+
+.axis path {
+    fill:none;
+    stroke: black;
+}
+.axis {
+    font-size:8pt;
+    font-family:sans-serif;
+    fill:black;
+    stroke:black;
+}
+.tick {
+    fill:none;
+    stroke:black;
+}
+.resid {
+    stroke:black;
+    stroke-width:0.5px;
+    fill:RoyalBlue;
+    opacity:0.6;
+    r:5;
+}
+.npts {
+    stroke:black;
+    stroke-width:0.5px;
+    fill:red;
+    opacity:0.6;
+    r:3;
+}
+.path {
+    fill:none;
+}
+
+
+    </style>
+
 </head>
 
 <body>
     <script>
 
-// Graphics definitions
+// Graphics definitions in this section
 
         var epicenterIcon = L.icon({
             iconUrl : "images/star.png",
             iconSize : 16,
         });
 
-// Keep functions in this section
+        var solutionMarkerOption = {
+                        color : '#00f',
+                        radius : 4,
+                        fillOpacity : 0,
+                    };  
 
-        var solutions;
- 
+        var solpathOption = {
+                    color:'blue',
+                    weight:2,
+                    opacity:0.5,
+                    dashArray:'10,10',
+                }
+
+// Dropdown functions
+
+    function eventSelect() {
+        document.getElementById("eventSelect").classList.toggle("show");
+    }
+
+// Close the dropdown menu if the user clicks outside of it
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+
+// Javascript functions in this section
+
+        var solutionLayer;
+        var lineLayer;
+        var layersLayer;
+        var svg;
+
         function initmap() {
 // set up the map
             map = new L.Map('map');
@@ -39,6 +120,9 @@
             map.setView([34.0, -118.0],8);
             map.addLayer(osm);
         }
+
+        function initgraph() {
+}
 
        function loadData(evid) {
             inputname = 'data/solutions.' + evid + '.js';
@@ -57,12 +141,18 @@
             console.log('Now in printData.')
             for (i = 0; i < data.length; i++) {
                 out = data[i].lat + ',' + data[i].lon;
-                console.log(out);
             }
-        } 
+        }
 
         function onLoadSolution() {
-// Assumes solutionsData has been populated
+            // data is in global variable solutionsData
+            drawMap();
+            drawGraph();
+        }
+
+        // Map functions
+
+        function drawMap() {
             data = solutionsData;
             solutionsArray = [];
             lineArray = [];
@@ -70,6 +160,9 @@
             for (i=0; i<data.features.length; i++) {
                 solution = data.features[i];
                 p = solution.properties;
+                // Have to reverse this since geojson format is (lon,lat)
+                // and leaflet format is (lat,lon)
+                coords = solution.geometry.coordinates.slice().reverse();
 
                 var popuptext;
                 var ptLayer;
@@ -84,81 +177,183 @@
                 }
                 else {
                     popuptext = "t: " + p.t + " (" + p.npts + " pts)<br>"
-                        + "M" + p.mag + "<br>resid: " + p.resid; 
-                    markerOption = {
-                        color : '#00f',
-                        radius : 4,
-                        fillOpacity : 0,
-                    };  
+                        + "M" + p.mag + " (" + p.ix + "," + p.iy + ")<br>"
+                        + "(" + coords[1] + "," + coords[0] + ")<br>"
+                        + "resid: " + p.resid; 
+
                     ptLayer = L.geoJson(solution, {
                         pointToLayer: function(feature,latlon) {
-                            return L.circleMarker(latlon, markerOption);
+                            return L.circleMarker(latlon, solutionMarkerOption);
                         }
                     });
                     
-                    
-                    // Also draw intra-solution path
-                    // Have to reverse this since geojson format is (lon,lat)
-                    // and leaflet format is (lat,lon)
-                    coords = solution.geometry.coordinates.slice().reverse();
+                    // Also store this for intra-solution path
                     lineArray.push(coords);
                 }          
 
-// Add to solution points layer
+            // Add to solutions layer
 
                 ptLayer.bindPopup(popuptext);
                 solutionsArray.push(ptLayer);
-
             }
 
-// Now plot solutions
+            // Now plot solutions
 
+            if (solutionLayer) {
+                map.removeLayer(solutionLayer);
+            }
             solutionLayer = L.featureGroup(solutionsArray);
             solutionLayer.addTo(map);
             map.fitBounds(solutionLayer.getBounds());
  
-// Now plot lines
+            // Now plot solution paths
+
             console.log(lineArray);
-            lineLayer = L.polyline(lineArray,
-                {
-                    color:'blue',
-                    weight:2,
-                    opacity:0.5,
-                    dashArray:'10,10',
-                }
-            ).addTo(map);
+            if (lineLayer) {
+                map.removeLayer(lineLayer);
+            } 
+            lineLayer = L.polyline(lineArray, solpathOption).addTo(map);
 
-// Add control checkboxes 
+            // Add control checkboxes 
 
-            L.control.layers({},{
-               'Solutions':solutionLayer,
-                'Lines':lineLayer,
-            }).addTo(map);
+            if (layersLayer) {
+                console.log(layersLayer);
+                layersLayer.removeLayer(solutionLayer);
+                layersLayer.removeLayer(lineLayer);
+            }
+            else {
+                layersLayer = L.control.layers({},{
+                   'Solutions':solutionLayer,
+                    'Lines':lineLayer,
+                }).addTo(map);
+            }
             console.log('Finished plotting ' + evid + '.');
         }
+
+        // Plot functions
+
+        var margin = 50,
+            width = 700,
+            height = 250;
+
+        function drawGraph() {
+            console.log('Now in drawGraph.');
+            console.log(solutionsData);
+
+            // Take out epicenter point
+            var data = [];
+            for (i = 0; i < solutionsData.features.length; i++) {
+                pt = solutionsData.features[i];
+                if(pt.properties.is_epicenter) {
+                    continue;
+                }
+                data.push(pt);
+            }
+
+            if (svg) {
+                svg.remove();
+            }
+            svg = d3.select('#graph')
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            svg.selectAll('circle.resid')
+                .data(data).enter()
+                .append('circle').attr('class','resid');
+            svg.selectAll('circle.npts')
+                .data(data).enter()
+                .append('circle').attr('class','npts');
+
+
+            var x_extent = [0,d3.max(data,function(d){
+                  return d.properties.t})];
+            var y_extent1 = [0,d3.max(data,function(d){
+                  return d.properties.resid})];
+            var y_extent2 = [0,d3.max(data,function(d){
+                  return d.properties.npts})];
+
+            var x_scale = d3.scale.linear().range([margin,width-margin])
+                .domain(x_extent);
+            var y_scale1 = d3.scale.linear().range([height-margin,margin])
+                .domain(y_extent1);
+            var y_scale2 = d3.scale.linear().range([height-margin,margin])
+                .domain(y_extent2);
+
+            var x_axis = d3.svg.axis().scale(x_scale);
+            var y_axis1 = d3.svg.axis().scale(y_scale1).orient('left');
+            var y_axis2 = d3.svg.axis().scale(y_scale2).orient('right');
+
+            var line_resid = d3.svg.line()
+                .x(function(d){return x_scale(d.properties.t)})
+                .y(function(d){return y_scale1(d.properties.resid)});
+            var line_npts = d3.svg.line()
+                .x(function(d){return x_scale(d.properties.t)})
+                .y(function(d){return y_scale2(d.properties.npts)});
+
+            svg.append('path')
+                .attr('d',line_resid(data))
+                .attr('class','path resid');
+
+            svg.append('path')
+                .attr('d',line_npts(data))
+                .attr('class','path npts');
+
+            svg.selectAll('circle')
+                .attr('cx',function(d){return x_scale(d.properties.t)});
+            svg.selectAll('circle.resid')
+                .attr('cy',function(d){return y_scale1(d.properties.resid)});
+            svg.selectAll('circle.npts')
+                .attr('cy',function(d){return y_scale2(d.properties.npts)});
+            svg.selectAll('circle').attr('r',5);
+
+            svg.append('g')
+                .attr('class','x axis')
+                .attr('transform','translate(0,'+(height-margin)+')')
+                .call(x_axis).append('text')
+                .text('Time after origin (s)')
+                .attr('x',(width/2)-margin)
+                .attr('y',margin/1.5);
+            svg.append('g')
+                .attr('class','y axis')
+                .attr('transform','translate('+margin+',0)')
+                .call(y_axis1).append('text')
+                .text('Residual')
+                .attr('transform','rotate(-90,-30,0) translate(-170)');
+            svg.append('g')
+                .attr('class','y axis')
+                .attr('transform','translate('+(width-margin)+',0)')
+                .call(y_axis2).append('text')
+                .text('Number of responses')
+                .attr('transform','rotate(90,-10,0) translate(55)');
+
+            console.log('Now done with drawGraph.');
+        }
+
     </script>
-    <div id="map" style="width: 600px; height: 600px"></div>
+
+    <div id="map" style="width: 700px; height: 400px"></div>
 
     <script type="text/javascript">
-
         initmap();
-        evid = 'test';
+    </script>
 
-        loadData('test');
-        
-//        inputname = 'data/solutions.' + evid + '.js';
-//        $.getScript(inputname,onload(evid));
+<select onchange="loadData(this.value)">
+  <option value="test">Select event</option>
+  <option value="nc72282711">nc72282711</option>
+  <option value="ci15296281">ci15296281</option>
+  <option value="nc71996906">nc71996906</option>
+  <option value="ci15481673">ci15481673</option>
+  <option value="ci14745580">ci14745580</option>
+  <option value="ci37372672">ci37372672</option>
+  <option value="ci15520985">ci15520985</option>
+</select>
 
-        var geojsonMarker = {
-            radius : 8,
-            fillColor: "#ff7800",
-            color: "#000",
-            weight: 1,
-            opacity : 1,
-            fillOpacity: 0.8
-        };
-       
-        
-	</script>
+<div id="graph"></div>
+
+   <script>
+        evid = 'ci15296281';
+        loadData(evid);        
+  </script>
 </body>
 

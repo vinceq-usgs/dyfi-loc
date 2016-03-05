@@ -3,7 +3,16 @@ DYFI locator. Given a batch of DYFI entries (point intensities), determine the e
 
 The goal is to provide a solution (magnitude, location, time, uncertainty?) as a dyfi-loc product to PDL. This will be used by Hydra to help trigger smaller felt-but-underinstrumented events. Paul also discussed receiving TED location (which should always happen first) as the seed for starting this procedure and initial location.
 
-Procedure
+Location Viewer
+---------------
+
+To use the Location Viewer:
+0. Install this repository.
+1. Start a local HTTP server by entering 'cd leaflet; ./httpserver &'
+2. Point your browser to 'http://localhost:8000/results.html
+3. Use the Event Selector menu in the lower left corner to select an event.
+
+Locator Algorithm
 ---------
 1. Load a collection of unassociated individual responses with location (geocoded) and intensities. These will be "observation".
 2. Determine the location with largest intensity; use that as the starting point. Alternatively, use a weighted (by squared intensity) spatial average. This will be the initial search location.
