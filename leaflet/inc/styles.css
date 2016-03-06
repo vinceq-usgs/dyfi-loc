@@ -1,0 +1,39 @@
+// D3 styles
+svg {
+  font: 10px sans-serif;
+}
+
+.axis path {
+    fill:none;
+    stroke: black;
+}
+.axis {
+    font-size:8pt;
+    font-family:sans-serif;
+    fill:black;
+    stroke:black;
+}
+.tick {
+    fill:none;
+    stroke:black;
+}
+.resid {
+    stroke:black;
+    stroke-width:0.5px;
+    fill:RoyalBlue;
+    opacity:0.6;
+    r:5;
+}
+.npts {
+    stroke:black;
+    stroke-width:0.5px;
+    fill:red;
+    opacity:0.6;
+    r:3;
+}
+.path {
+    fill:none;
+}
+
+
+

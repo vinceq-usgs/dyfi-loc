@@ -22,6 +22,8 @@ import os.path
 import sys
 import json
 from copy import copy
+from shutil import copyfile
+
 from modules import locate_dyfi
 
 # INITIAL SETUP
@@ -132,17 +134,13 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
 
     allgeojson = { 'type': 'FeatureCollection', 'features' : solutions }
     
-    with open(outfilename, 'w') as outfile:
-        json.dump(allgeojson, outfile)
-        
-    # Also write output with a "solutionsData = ..." wrapper to
-    # leaflet/data/solutions.evid.js
-    evid = os.path.basename(args.infile).split('.')[-2]
-    outfilename = 'leaflet/data/solutions.' + evid + '.js'
     print('Writing to ' + outfilename)
     with open(outfilename, 'w') as outfile:
-        outfile.write('solutionsData=');        
         json.dump(allgeojson, outfile)
+
+    evid = os.path.basename(args.infile).split('.')[-2]
+    webfilename = 'leaflet/data/out.' + evid + '.geojson'
+    copyfile(outfilename,webfilename)
         
 print(allresults)
 print('Done.')
