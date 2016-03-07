@@ -11,15 +11,18 @@
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
     <script src="http://calvinmetcalf.github.io/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="inc/styles.css">
+    <script src="inc/leafletmouseposition.js"></script>
+    <script src="inc/dropdown.js"></script>
+    <script src="inc/leafletmap.js"></script>
+    <script src="inc/d3plot.js"></script>
 
 </head>
 
 <body>
-    <script src="inc/dropdown.js"></script>
-    <script src="inc/leafletmap.js"></script>
-    <script src="inc/d3plot.js"></script>
     <script>
+        var map;
 
         function loadData(evid) {
 
@@ -29,8 +32,8 @@
 
         function onLoadSolution(data) {
             solutionsData = data;
-            drawMap();
-            drawGraph();
+            var mapLayers = drawMap();
+            var graphLayers = drawGraph();
         }
  
     </script>
@@ -38,7 +41,7 @@
     <div id="map" style="width: 700px; height: 400px"></div>
 
     <script type="text/javascript">
-        initmap();
+        map = initmap();
     </script>
 
 <select onchange="loadData(this.value)">
