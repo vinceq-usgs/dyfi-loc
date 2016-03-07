@@ -29,7 +29,7 @@
 
         var solutionLayer;
         var lineLayer;
-        var layersLayer;
+        var layercontrolLayer;
 
         function initmap() {
 // set up the map
@@ -108,16 +108,13 @@
 
             // Add control checkboxes 
 
-            if (layersLayer) {
-                layersLayer.removeLayer(solutionLayer);
-                layersLayer.removeLayer(lineLayer);
+            if (layercontrolLayer) {
+                layercontrolLayer.removeFrom(map);
             }
-            else {
-                layersLayer = L.control.layers({},{
-                   'Solutions':solutionLayer,
-                    'Lines':lineLayer,
-                }).addTo(map);
-            }
+            layercontrolLayer = L.control.layers({},{
+               'Solutions':solutionLayer,
+                'Lines':lineLayer,
+            }).addTo(map);
             console.log('Finished plotting ' + evid + '.');
             var mapLayers = L.layerGroup([solutionLayer,lineLayer]);
             return mapLayers;
