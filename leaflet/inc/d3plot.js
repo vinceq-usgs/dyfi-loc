@@ -1,4 +1,5 @@
        var svg;
+        var selected;
         // Plot functions
 
         var margin = 50,
@@ -68,12 +69,17 @@
                 .attr('class','path npts');
 
             svg.selectAll('circle')
-                .attr('cx',function(d){return x_scale(d.properties.t)});
+                .attr('cx',function(d){return x_scale(d.properties.t)})
+                .on('mouseover',mouseOverGraph);
             svg.selectAll('circle.resid')
+                .attr('id',function(d){return 'graph_resid_' + d.properties.t})
                 .attr('cy',function(d){return y_scale1(d.properties.resid)});
             svg.selectAll('circle.npts')
+                .attr('id',function(d){return 'graph_npts_' + d.properties.t})
                 .attr('cy',function(d){return y_scale2(d.properties.npts)});
-            svg.selectAll('circle').attr('r',5);
+            svg.selectAll('circle')
+                .attr('r',5)
+                .call(loadGraphPt);
 
             svg.append('g')
                 .attr('class','x axis')
@@ -98,3 +104,31 @@
             console.log('Now done with drawGraph.');
         }
 
+    function mouseOverGraph(e) {
+        mappt = mappoints[e.properties.t];
+        if (mappt) {
+            mouseOver(mappt);
+        }
+    }
+    
+    function loadGraphPt(e) {
+        console.log(e);
+        pts = e[0];
+        for (i=0; i<pts.length; ++i) {
+            t = pts[i].time;
+//            graphpoints[t] = pts[i];
+        }
+    }
+
+    function graphHilight(e) {
+        if (selected) {
+        selected.style({
+            'stroke':'black',
+            'stroke-width':1
+            }).attr('r',4);
+        }
+        var selection = svg.select('#graph_resid_'+e);
+        console.log(selection);
+        selection.style({'stroke':'red','stroke-width':3}).attr('r',8);
+        selected = selection;
+    }

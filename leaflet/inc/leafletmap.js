@@ -63,7 +63,6 @@
                 coords = solution.geometry.coordinates.slice().reverse();
                 var popuptext;
                 var ptLayer;
-
                 isEpicenter = solution.properties.is_epicenter;
                 if (isEpicenter) {
                     ptLayer = L.geoJson(solution, {
@@ -79,6 +78,7 @@
                         pointToLayer: function(feature,latlon) {
                             m = L.circleMarker(latlon, solutionMarkerOption);
                             m.on('mouseover',mouseOver);
+                            mappoints[p.t] = m;
                             return m;
                         },
                     });                                                    
@@ -90,7 +90,6 @@
             // Add to solutions layer
                 solutionsArray.push(ptLayer);
             }
-
             // Now plot solutions
 
             if (solutionLayer) {
@@ -125,7 +124,13 @@
         }
 
         function mouseOver(e) {
-            pt = e.target;
+            var pt;
+            if (e.target) {
+                pt = e.target;
+            }
+            else {
+                pt = e;
+            }
             p = pt.feature.properties;
             coords = pt.feature.geometry.coordinates;
             var popuptext;
@@ -145,6 +150,8 @@
                 .on('popupopen',highlightMarker)
                 .on('popupclose',resetMarker)
                 .openPopup();
+
+            graphHilight(p.t);
         }
 
 // TODO: Make this populate .on(popupclose)

@@ -7,22 +7,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+//    <link rel="stylesheet" type="text/css" href="inc/leaflet.timeline.min.css" />
+    <link rel="stylesheet" type="text/css" href="inc/styles.css">
+</head>
+
+<body>
     <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
     <script src="http://calvinmetcalf.github.io/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="inc/styles.css">
     <script src="inc/leafletmouseposition.js"></script>
     <script src="inc/dropdown.js"></script>
     <script src="inc/leafletmap.js"></script>
     <script src="inc/d3plot.js"></script>
-
-</head>
-
-<body>
+//    <script src="inc/leaflet.timeline.min.js"></script>
     <script>
         var map;
+        var mapLayers;
+        var graphLayers;
+        var solutionsData;
+        var mappoints = [];
+        var graphpoints = [];
 
         function loadData(evid) {
 
@@ -31,10 +37,16 @@
         }
 
         function onLoadSolution(data) {
+            mappoints = [];
+            graphpoints = [];
             solutionsData = data;
-            var mapLayers = drawMap();
-            var graphLayers = drawGraph();
+            mapLayers = drawMap();
+            graphLayers = drawGraph();
+
+            console.log(mappoints);
+            console.log(graphpoints);
         }
+
  
     </script>
 
