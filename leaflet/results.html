@@ -26,25 +26,24 @@
         var map;
         var mapLayers;
         var graphLayers;
+
         var solutionsData;
         var mappoints = [];
         var graphpoints = [];
 
         function loadData(evid) {
 
-            inputname = 'data/out.' + evid + '.geojson';
+            var inputname = 'data/out.' + evid + '.geojson';
             $.getJSON(inputname,onLoadSolution);
         }
 
         function onLoadSolution(data) {
+            solutionsData = data;
+
             mappoints = [];
             graphpoints = [];
-            solutionsData = data;
             mapLayers = drawMap();
             graphLayers = drawGraph();
-
-            console.log(mappoints);
-            console.log(graphpoints);
         }
 
  

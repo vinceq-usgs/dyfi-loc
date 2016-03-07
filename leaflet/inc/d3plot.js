@@ -112,7 +112,6 @@
     }
     
     function loadGraphPt(e) {
-        console.log(e);
         pts = e[0];
         for (i=0; i<pts.length; ++i) {
             t = pts[i].time;
@@ -128,7 +127,6 @@
             }).attr('r',4);
         }
         var selection = svg.select('#graph_resid_'+e);
-        console.log(selection);
         selection.style({'stroke':'red','stroke-width':3}).attr('r',8);
         selected = selection;
     }

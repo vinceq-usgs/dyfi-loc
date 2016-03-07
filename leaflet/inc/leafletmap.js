@@ -66,7 +66,7 @@
                 isEpicenter = solution.properties.is_epicenter;
                 if (isEpicenter) {
                     ptLayer = L.geoJson(solution, {
-                        pointToLayer: function(feature,latlon) {
+                        pointToLayer: function(f,latlon) {
                             return L.marker(latlon, {
                                 icon:epicenterIcon,
                             }).on('mouseover',mouseOver);
@@ -75,7 +75,7 @@
                 }
                 else {
                     ptLayer = L.geoJson(solution, {
-                        pointToLayer: function(feature,latlon) {
+                        pointToLayer: function(f,latlon) {
                             m = L.circleMarker(latlon, solutionMarkerOption);
                             m.on('mouseover',mouseOver);
                             mappoints[p.t] = m;
@@ -166,7 +166,6 @@
         }
 
         function resetMarker(e) {
-            console.log(e);
             pt = e.target;
             p = pt.feature.properties;
             if (p.is_epicenter) {
@@ -175,6 +174,6 @@
             pt.setStyle(solutionMarkerOption);
         }
 
-
+             
 
 
