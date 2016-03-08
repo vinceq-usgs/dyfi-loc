@@ -12,6 +12,7 @@ To use the Location Viewer:
 2. Start a local HTTP server by entering 'cd leaflet; ./httpserver &'
 3. Point your browser to 'http://localhost:8000/results.html
 4. Use the Event Selector menu in the lower left corner to select an event.
+5. Hover mouse pointer over solutions in map or graph to see info.
 
 Locator Algorithm
 ---------
