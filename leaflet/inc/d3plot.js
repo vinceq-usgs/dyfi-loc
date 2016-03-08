@@ -70,7 +70,8 @@
 
             svg.selectAll('circle')
                 .attr('cx',function(d){return x_scale(d.properties.t)})
-                .on('mouseover',mouseOverGraph);
+                .on('mouseover',mouseOverGraph)
+                .on('click',showSolution);
             svg.selectAll('circle.resid')
                 .attr('id',function(d){return 'graph_resid_' + d.properties.t})
                 .attr('cy',function(d){return y_scale1(d.properties.resid)});

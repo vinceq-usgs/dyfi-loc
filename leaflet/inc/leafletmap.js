@@ -201,9 +201,20 @@
 
     function showSolution(e) {
         console.log(e);
-        t = e.target;
-        t.bindPopup('show solution grid here').openPopup();
-            
+        var pt;
+        if (e.target) {
+            pt = e.target.feature;
+        }
+        else if (e.properties) {
+            pt = e;
+        }
+        else {
+            return;
+        }
+        t = pt.properties.t;
+        text = 'TODO: Show solution grid for t=' + t;
+        infoControl.update(text);
+    
     }
 
              

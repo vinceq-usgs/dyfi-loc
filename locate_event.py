@@ -17,7 +17,6 @@ DYFI observations). Each Point requires two properties:
 """
 
 import argparse
-import re
 import os.path
 import sys
 import json
@@ -68,6 +67,10 @@ if args.iterations:
 else:
     print('Running through all entries.')
     args.iterations
+
+    
+evid = os.path.basename(args.infile).split('.')[-2]
+
 
 outfilename = 'output/out.' + os.path.basename(args.infile)
 if args.outputfile:
@@ -138,7 +141,6 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     with open(outfilename, 'w') as outfile:
         json.dump(allgeojson, outfile)
 
-    evid = os.path.basename(args.infile).split('.')[-2]
     webfilename = 'leaflet/data/out.' + evid + '.geojson'
     copyfile(outfilename,webfilename)
         
