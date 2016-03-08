@@ -15,7 +15,7 @@
 
         var solutionMarkerHighlight = {
                         color : 'red',
-                        weight : 2,
+                        weight : 4,
                     };  
 
         var solpathOption = {
@@ -48,7 +48,7 @@
             L.control.scale({imperial:0,maxWidth:200}).addTo(map);
             return map;
         }
-        // Map functions
+// Map functions
 
         function drawMap() {
             data = solutionsData;
@@ -67,9 +67,12 @@
                 if (isEpicenter) {
                     ptLayer = L.geoJson(solution, {
                         pointToLayer: function(f,latlon) {
-                            return L.marker(latlon, {
+                            m = L.marker(latlon, {
                                 icon:epicenterIcon,
-                            }).on('mouseover',mouseOver);
+                            });
+                            m.on('mouseover',mouseOver);
+                            m.on('click',showSolution);
+                            return m;
                         }
                     });
                 }
@@ -78,6 +81,7 @@
                         pointToLayer: function(f,latlon) {
                             m = L.circleMarker(latlon, solutionMarkerOption);
                             m.on('mouseover',mouseOver);
+                            m.on('click',showSolution);
                             mappoints[p.t] = m;
                             return m;
                         },
@@ -90,6 +94,13 @@
             // Add to solutions layer
                 solutionsArray.push(ptLayer);
             }
+            // Now plot solution paths
+
+            if (lineLayer) {
+                map.removeLayer(lineLayer);
+            } 
+            lineLayer = L.polyline(lineArray, solpathOption).addTo(map);
+
             // Now plot solutions
 
             if (solutionLayer) {
@@ -99,13 +110,6 @@
             solutionLayer.addTo(map);
             map.fitBounds(solutionLayer.getBounds());
  
-            // Now plot solution paths
-
-            if (lineLayer) {
-                map.removeLayer(lineLayer);
-            } 
-            lineLayer = L.polyline(lineArray, solpathOption).addTo(map);
-
             // Add control checkboxes 
 
             if (layercontrolLayer) {
@@ -143,15 +147,15 @@
                     + "resid: " + p.resid; 
             
             }
-            popup = pt.bindPopup(popuptext)
-                .on('popupopen',highlightMarker)
-                .on('popupclose',resetMarker)
-                .openPopup();
+            infoControl.update(popuptext);            
+//            popup = pt.bindPopup(popuptext)
+//                .on('popupopen',highlightMarker)
+//                .on('popupclose',resetMarker)
+ //               .openPopup();
 
             graphHilight(p.t);
         }
 
-// TODO: Make this populate .on(popupclose)
         function highlightMarker(e) {
             pt = e.target;
             p = pt.feature.properties;
@@ -170,6 +174,37 @@
             }
             pt.setStyle(solutionMarkerOption);
         }
+
+    function drawInfoControl() {
+        console.log('in drawInfoControl');
+        if (infoControl) {
+            infoControl.removeFrom('map'); // This gives error?
+        }
+
+        infoControl = L.control({'position':'bottomright'});  
+        infoControl.onAdd = function(map) {
+            // create a div with a class "info"
+            this._div = L.DomUtil.create('div', 'infoControl'); 
+            this.update();
+            return this._div;
+        };
+ 
+// method that we will use to update the control
+        infoControl.update = function (text) {
+            this._div.innerHTML = "<div class='infoControl'>"+text+"</div>";
+        };
+
+        console.log('Adding to map');
+        infoControl.addTo(map);
+        return infoControl;
+    }
+
+    function showSolution(e) {
+        console.log(e);
+        t = e.target;
+        t.bindPopup('show solution grid here').openPopup();
+            
+    }
 
              
 
