@@ -1,3 +1,4 @@
+
 // Graphics definitions in this section
 
         var epicenterIcon = L.icon({
@@ -10,7 +11,7 @@
             color : 'black',
             weight : 1,
             fillColor : 'blue',                        
-            fillOpacity : 0.8,
+            fillOpacity : 1.0,
                     };
 
        var gridMarkerOption = {
@@ -18,10 +19,10 @@
             color : 'black',
             weight : 1,
             fillColor : 'white',                        
-            fillOpacity : 0.8,
+            fillOpacity : 1.0,
         }
 
-        var solutionMarkerHighlight = {
+        var solutionMarkerHilight = {
                         color : 'red',
                         weight : 4,
                     };  
@@ -160,11 +161,11 @@
             }
             infoControl.update(text);            
 
-            highlightMarker(e);
+            hilightMarker(e);
             graphHilight(p.t);
         }
 
-        function highlightMarker(e) {
+        function hilightMarker(e) {
             var pt;
             if (e.target) { pt = e.target; }
             else { pt = e; }
@@ -173,7 +174,7 @@
 
             var p = pt.feature.properties;
             if (p.is_epicenter) { return; }
-            pt.setStyle(solutionMarkerHighlight);
+            pt.setStyle(solutionMarkerHilight);
             if (hilightedpt && (hilightedpt !== pt)) {
                 resetMarker(hilightedpt); 
             }
@@ -216,7 +217,7 @@
         if (e.target) { pt = e.target.feature; } else { pt = e; }
         var t = pt.properties.t;
     
-        if (t == displayedgrid) {
+        if (pt == gridparentpt) {
             console.log('Removing grid.');
             removeGridLayer();
             return;
@@ -227,14 +228,16 @@
             + 'Mouseover point to see stats';
         infoControl.update(text);
 
+        gridparentpt = pt;
        var inputname = 'data/grids/' + evid + '/grid.' + t + '.geojson';
-        displayedgrid = t;
         $.getJSON(inputname,onLoadGrid);
     }
 
     function onLoadGrid(grid) {
-        trialGrid = grid;
         showGrid(grid);
+        trialGrid = grid;
+        solutionLayer.bringToFront();
+
     }
         
     function showGrid(grid) {
@@ -256,6 +259,9 @@
             gridpts.push(ptLayer);
         }
         gridLayer = L.featureGroup(gridpts).addTo(map);
+        if (!trialGrid) {
+            map.fitBounds(gridLayer.getBounds());
+        }
         gridLayer.addTo(map);
  
         // Add control checkbox 
@@ -277,24 +283,35 @@
         if (!gridLayer) { return; }
         map.removeLayer(gridLayer);
         layercontrolLayer.removeLayer(gridLayer);
-        displayedgrid = undefined;
+        gridparentpt = undefined;
     }
 
     function setGridMarkerStyle(f) {
-        var v = f.properties.resid;
-        var color =  v > 2.67 ? '#800026' :
-           v > 2.33 ? '#BD0026' :
+        var val = f.properties.mag;
+        var bestval = gridparentpt.properties.mag;
+        var v = (val - bestval);
+        var color =  v > 3.0 ? '#800026' :
            v > 2.0 ? '#E31A1C' :
-           v > 1.67  ? '#FC4E2A' :
+           v > 1.66 ? '#FC4E2A' :
            v > 1.33 ? '#FD8D3C' :
            v > 1.0   ? '#FEB24C' :
-           v > 0.67   ? '#FED976' :
-                      '#FFEDA0';
+           v > 0.66   ? '#FED976' :
+            v > 0.33 ? '#FFEDA0' :
+            v >= -0.1 ? 'white' :
+            v > -0.2 ? '#d0d1e6' :
+            v > -0.3 ? '#a6bddb' :
+            v > -0.4 ? '#74a9cf' :
+            v > -0.5 ? '#3690c0' :
+            v > -0.6 ? '#0570b0' :
+            v > -0.7 ? '#045a8d' :
+                '#023858';
+
 
         options = {};
         for (var prop in gridMarkerOption) {
             options[prop] = gridMarkerOption[prop];
-}
+        }
         options['fillColor'] = color;
         return options;
-}
+    }
+

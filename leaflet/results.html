@@ -31,7 +31,7 @@
         var infoControl;
         var gridLayer;
         var hilightedpt;
-        var displayedgrid;
+        var gridparentpt;
 
         var solutionsData;
         var mappoints = [];
@@ -50,6 +50,7 @@
 
             mappoints = [];
             graphpoints = [];
+            trialGrid = undefined;
             mapLayers = drawMap();
             graphLayers = drawGraph();
             infoControl = drawInfoControl();
