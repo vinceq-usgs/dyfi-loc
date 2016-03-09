@@ -64,9 +64,7 @@
             solutionsArray = [];
             lineArray = [];
 
-            if (gridLayer) {
-                removeGridLayer();
-            }
+            if (gridLayer) { removeGridLayer(); }
 
 
             for (i=0; i<data.features.length; i++) {
@@ -218,22 +216,25 @@
         var t = pt.properties.t;
     
         if (pt == gridparentpt) {
-            console.log('Removing grid.');
             removeGridLayer();
             return;
         }
 
-        removeGridLayer();        
         var text = 'Showing solution grid for t=' + t + '<br>'
             + 'Mouseover point to see stats';
         infoControl.update(text);
 
         gridparentpt = pt;
-       var inputname = 'data/grids/' + evid + '/grid.' + t + '.geojson';
+        var inputname = 'data/grids/' + evid + '/grid.' + t + '.geojson';
         $.getJSON(inputname,onLoadGrid);
     }
 
     function onLoadGrid(grid) {
+        if (gridLayer) {
+            var savept = gridparentpt;
+            removeGridLayer();
+            gridparentpt = savept;
+        }
         showGrid(grid);
         trialGrid = grid;
         solutionLayer.bringToFront();
