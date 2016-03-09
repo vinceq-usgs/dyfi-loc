@@ -29,9 +29,9 @@ RESID_TYPE = 'B'
 # TODO: Make these parameters configurable
 
 PRECISION = 4
-xgridrange = range(-200,200,10)          # search grid in km
-ygridrange = range(-200,200,10)          # search grid in km
-magrange = [ x*0.1 for x in range(18,70) ]   # search parameters for magnitude
+xgridrange = range(-200,210,10)          # search grid in km
+ygridrange = range(-200,210,10)          # search grid in km
+magrange = [ x*0.1 for x in range(18,71) ]   # search parameters for magnitude
 
 def locate(pts):
     """
@@ -71,7 +71,7 @@ def locate(pts):
                 bestresid = resid
                 bestloc = loc
 
-    tmpfilename = 'tmp/tmp.output.geojson'
+    tmpfilename = 'tmp/solutiongrid.geojson'
     allgeojson = { 'type' : 'FeatureCollection', 'features' : saveresults }
     with open(tmpfilename,'w') as outfile:
         json.dump(allgeojson,outfile)
