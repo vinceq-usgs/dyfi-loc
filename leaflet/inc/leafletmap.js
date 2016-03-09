@@ -1,6 +1,24 @@
 
 // Graphics definitions in this section
 
+var gridColorVals = {
+    2.33 : '#800026',
+    2.0 : '#E31A1C' ,
+    1.66 : '#FC4E2A' ,
+    1.33 : '#FD8D3C' ,
+    1.0 : '#FEB24C' ,
+    0.66 : '#FED976' ,
+    0.33 : '#FFEDA0' ,
+    '-0.1' : 'white',
+    '-0.2' : '#d0d1e6' ,
+    '-0.3' : '#a6bddb' ,
+    '-0.4' : '#74a9cf' ,
+    '-0.5' : '#3690c0' ,
+    '-0.6' : '#0570b0' ,
+    '-0.7' : '#045a8d' ,
+    '-999' : '#023858',
+}
+
         var epicenterIcon = L.icon({
             iconUrl : "images/star.png",
             iconSize : 16,
@@ -60,7 +78,7 @@
 // Map functions
 
         function drawMap() {
-            data = solutionsData;
+            data = solutionsdata;
             solutionsArray = [];
             lineArray = [];
 
@@ -229,26 +247,32 @@
         $.getJSON(inputname,onLoadGrid);
     }
 
-    function onLoadGrid(grid) {
+    function onLoadGrid(griddata) {
         if (gridLayer) {
+            // removeGridLayer will clobber gridparentpt; save it
             var savept = gridparentpt;
             removeGridLayer();
             gridparentpt = savept;
         }
-        showGrid(grid);
-        trialGrid = grid;
+        showGrid(griddata);
+        trialgriddata = griddata;
         solutionLayer.bringToFront();
-
     }
         
-    function showGrid(grid) {
+    function showGrid(griddata) {
+        console.log('Now in showGrid().');
         var gridpts = [];
+
+        // Remove old gridLayer if necessary
 
         if (gridLayer && layercontrolLayer) {
             layercontrolLayer.removeLayer(gridLayer);
         }
-        for (var i=0; i<grid.features.length; i++) {
-            var pt = grid.features[i];
+
+        // Now create new gridLayer and display it
+
+        for (var i=0; i<griddata.features.length; i++) {
+            var pt = griddata.features[i];
  
             var ptLayer = L.geoJson(pt, {
                 pointToLayer: function(f,latlon) {
@@ -260,7 +284,10 @@
             gridpts.push(ptLayer);
         }
         gridLayer = L.featureGroup(gridpts).addTo(map);
-        if (!trialGrid) {
+
+        // If this is the first gridLayer, reset bounds to fit
+
+        if (!trialgriddata) {
             map.fitBounds(gridLayer.getBounds());
         }
         gridLayer.addTo(map);
@@ -270,7 +297,27 @@
         if (layercontrolLayer) {
             layercontrolLayer.addOverlay(gridLayer,'Trial grid');
         }
-        return gridLayer;
+
+        // Add gridcolor legend
+
+        if (1==0) {
+            var legend = L.control({position: 'bottomright'});
+
+            legend.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'info legend'),
+                    grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+                    labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+                for (var i = 0; i < grades.length; i++) {
+                    div.innerHTML +=
+                        '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+                }
+                return div;
+            }
+//            legend.addTo('map');
+        }
     }
            
     function hoverGrid(e) {
@@ -279,7 +326,8 @@
             + 'M' + p.mag + ' (weighted mean)<br>resid: ' + p.resid + '<br>'
             + '<br>Click point to remove';
         infoControl.update(text);    
-    }  
+    } 
+ 
     function removeGridLayer() {
         if (!gridLayer) { return; }
         map.removeLayer(gridLayer);
@@ -291,28 +339,39 @@
         var val = f.properties.mag;
         var bestval = gridparentpt.properties.mag;
         var v = (val - bestval);
-        var color =  v > 3.0 ? '#800026' :
-           v > 2.0 ? '#E31A1C' :
-           v > 1.66 ? '#FC4E2A' :
-           v > 1.33 ? '#FD8D3C' :
-           v > 1.0   ? '#FEB24C' :
-           v > 0.66   ? '#FED976' :
-            v > 0.33 ? '#FFEDA0' :
-            v >= -0.1 ? 'white' :
-            v > -0.2 ? '#d0d1e6' :
-            v > -0.3 ? '#a6bddb' :
-            v > -0.4 ? '#74a9cf' :
-            v > -0.5 ? '#3690c0' :
-            v > -0.6 ? '#0570b0' :
-            v > -0.7 ? '#045a8d' :
-                '#023858';
-
+        var color = hash(v,gridColorVals);
 
         options = {};
         for (var prop in gridMarkerOption) {
             options[prop] = gridMarkerOption[prop];
         }
         options['fillColor'] = color;
+
         return options;
     }
+
+// Javascript doesn't have sorted dict, use this instead
+
+function hash(v,obj) {
+    if (!obj.sortedkeys) {
+        var sortedkeys = [];
+        for (var key in obj) {
+            if (key=='hash') { continue; }
+            if (!obj.hasOwnProperty(key)) { continue; }
+            sortedkeys.push(key);
+        }
+        sortedkeys.sort(function(a,b){return parseFloat(b)-parseFloat(a)});
+        obj.sortedkeys = sortedkeys;
+    }
+    for (var i=0; i<obj.sortedkeys.length; i++) {
+        var key = obj.sortedkeys[i];
+        if (v >= parseFloat(key)) {
+            return obj[key];
+        }
+    }
+    console.log('Out of bounds value ' + v);
+    var key = obj.sortedkeys[obj.sortedkeys.length - 1];
+    return obj[key];
+}
+
 

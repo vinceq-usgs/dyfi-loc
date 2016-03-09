@@ -24,33 +24,40 @@
     <script src="inc/d3plot.js"></script>
 //    <script src="inc/leaflet.timeline.min.js"></script>
     <script>
+
+        // Global variables
         var evid;
+        var hilightedpt;
+        var gridparentpt;
+        var trialgriddata;
+        var solutionsdata;
+
+
+        // Globally track layers
         var map;
         var mapLayers;
         var graphLayers;
-        var infoControl;
         var gridLayer;
-        var hilightedpt;
-        var gridparentpt;
+        var infoControl;
+        var gridLegend;
 
-        var solutionsData;
+        // Keep track of mapping from Graph to Leaflet, and vice versa
         var mappoints = [];
         var graphpoints = [];
-        var trialGrid;
 
         function loadData(ev) {
-            if (solutionsData && (evid == ev)) { return; }
+            if (solutionsdata && (evid == ev)) { return; }
             evid = ev;
             var inputname = 'data/out.' + evid + '.geojson';
             $.getJSON(inputname,onLoadSolutions);
         }
 
         function onLoadSolutions(data) {
-            solutionsData = data;
+            solutionsdata = data;
 
             mappoints = [];
             graphpoints = [];
-            trialGrid = undefined;
+            trialgriddata = undefined;
             mapLayers = drawMap();
             graphLayers = drawGraph();
             infoControl = drawInfoControl();

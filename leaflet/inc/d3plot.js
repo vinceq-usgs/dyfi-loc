@@ -11,8 +11,8 @@
 
             // Take out epicenter point
             var data = [];
-            for (i = 0; i < solutionsData.features.length; i++) {
-                pt = solutionsData.features[i];
+            for (i = 0; i < solutionsdata.features.length; i++) {
+                pt = solutionsdata.features[i];
                 if(pt.properties.is_epicenter) {
                     continue;
                 }
