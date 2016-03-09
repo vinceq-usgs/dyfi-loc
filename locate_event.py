@@ -25,6 +25,8 @@ from shutil import copyfile
 
 from modules import locate_dyfi
 
+tmpgridfile = 'tmp/solutiongrid.geojson'
+
 # INITIAL SETUP
 
 parser = argparse.ArgumentParser(
@@ -118,6 +120,13 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     print('%i: Running otime + %i mins (%i entries)...' %
         (iterations,t/60,this_npts))
     result = locate_dyfi.locate(this_pts)
+
+    # Copy solution grid to leaflet output
+
+    webgriddir = 'leaflet/data/grids/' + evid;
+    os.makedirs(webgriddir,exist_ok=True)
+    webgridfile = webgriddir + '/grid.' + str(t) + '.geojson'
+    copyfile(tmpgridfile,webgridfile)    
     
     # TODO: Use GeoJSON property methods for this
     result['properties']['t'] = t

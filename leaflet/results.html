@@ -29,18 +29,22 @@
         var mapLayers;
         var graphLayers;
         var infoControl;
+        var gridLayer;
+        var hilightedpt;
+        var displayedgrid;
 
         var solutionsData;
         var mappoints = [];
         var graphpoints = [];
+        var solutionGrid;
 
         function loadData(ev) {
             evid = ev;
             var inputname = 'data/out.' + evid + '.geojson';
-            $.getJSON(inputname,onLoadSolution);
+            $.getJSON(inputname,onLoadSolutions);
         }
 
-        function onLoadSolution(data) {
+        function onLoadSolutions(data) {
             solutionsData = data;
 
             mappoints = [];

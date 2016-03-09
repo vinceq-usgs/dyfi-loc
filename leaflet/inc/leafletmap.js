@@ -12,6 +12,13 @@
                         fillColor : 'blue',                        
                         fillOpacity : 0.8,
                     };  
+        var gridMarkerOption = {
+                        radius : 2,
+                        color : 'black',
+                        weight : 1,
+                        fillColor : 'green',                        
+                        fillOpacity : 0.8,
+                    };  
 
         var solutionMarkerHighlight = {
                         color : 'red',
@@ -55,6 +62,11 @@
             solutionsArray = [];
             lineArray = [];
 
+            if (gridLayer) {
+                removeGridLayer();
+            }
+
+
             for (i=0; i<data.features.length; i++) {
                 solution = data.features[i];
                 p = solution.properties;
@@ -71,7 +83,6 @@
                                 icon:epicenterIcon,
                             });
                             m.on('mouseover',mouseOver);
-                            m.on('click',showSolution);
                             return m;
                         }
                     });
@@ -81,7 +92,7 @@
                         pointToLayer: function(f,latlon) {
                             m = L.circleMarker(latlon, solutionMarkerOption);
                             m.on('mouseover',mouseOver);
-                            m.on('click',showSolution);
+                            m.on('click',clickSolution);
                             mappoints[p.t] = m;
                             return m;
                         },
@@ -132,10 +143,9 @@
             else {
                 pt = e;
             }
-            p = pt.feature.properties;
-            coords = pt.feature.geometry.coordinates;
+            var p = pt.feature.properties;
+            var coords = pt.feature.geometry.coordinates;
             var popuptext;
-            var reset;
             if (p.is_epicenter) {
                 popuptext = "Real epicenter:<br>M" + p.mag
                     + " (" + coords[1] + "," + coords[0] + ")<br>";                 
@@ -153,22 +163,28 @@
 //                .on('popupclose',resetMarker)
  //               .openPopup();
 
+            highlightMarker(e);
             graphHilight(p.t);
         }
 
         function highlightMarker(e) {
-            pt = e.target;
-            p = pt.feature.properties;
+            var pt;
+            if (e.target) { pt = e.target; }
+            else { pt = e; }
 
-            if (p.is_epicenter) {
-                return;
-            }
+            if (hilightedpt == e) { return; }
+
+            var p = pt.feature.properties;
+            if (p.is_epicenter) { return; }
             pt.setStyle(solutionMarkerHighlight);
+            if (hilightedpt && (hilightedpt !== pt)) {
+                resetMarker(hilightedpt); 
+            }
+            hilightedpt = pt;
         }
 
-        function resetMarker(e) {
-            pt = e.target;
-            p = pt.feature.properties;
+        function resetMarker(pt) {
+            var p = pt.feature.properties;
             if (p.is_epicenter) {
                 return;
             }
@@ -176,9 +192,8 @@
         }
 
     function drawInfoControl() {
-        console.log('in drawInfoControl');
         if (infoControl) {
-            infoControl.removeFrom('map'); // This gives error?
+            infoControl.removeFrom(map); 
         }
 
         infoControl = L.control({'position':'bottomright'});  
@@ -194,29 +209,76 @@
             this._div.innerHTML = "<div class='infoControl'>"+text+"</div>";
         };
 
-        console.log('Adding to map');
         infoControl.addTo(map);
         return infoControl;
     }
 
-    function showSolution(e) {
-        console.log(e);
+// Calls by map pt and graph pt have different sources
+    function clickSolution(e) {
         var pt;
-        if (e.target) {
-            pt = e.target.feature;
-        }
-        else if (e.properties) {
-            pt = e;
-        }
-        else {
+        if (e.target) { pt = e.target.feature; } else { pt = e; }
+        var t = pt.properties.t;
+    
+        if (t == displayedgrid) {
+            console.log('Removing grid.');
+            removeGridLayer();
             return;
         }
-        t = pt.properties.t;
-        text = 'TODO: Show solution grid for t=' + t;
+
+        removeGridLayer();        
+        var text = 'Showing solution grid for t=' + t;
         infoControl.update(text);
-    
+
+       var inputname = 'data/grids/' + evid + '/grid.' + t + '.geojson';
+        displayedgrid = t;
+        $.getJSON(inputname,onLoadGrid);
     }
 
-             
+    function onLoadGrid(grid) {
+        solutionGrid = grid;
+        showGrid(grid);
+    }
+        
+    function showGrid(grid) {
+        var gridpts = [];
 
+        if (gridLayer && layercontrolLayer) {
+            layercontrolLayer.removeLayer(gridLayer);
+        }
+        for (var i=0; i<grid.features.length; i++) {
+            var pt = grid.features[i];
+ 
+            var ptLayer = L.geoJson(pt, {
+                pointToLayer: function(f,latlon) {
+                    return L.circleMarker(latlon,gridMarkerOption)
+                        .on('mouseover',hoverGrid)
+                        .on('click',removeGridLayer);
+                },
+            });                                                    
+            gridpts.push(ptLayer);
+        }
+        gridLayer = L.featureGroup(gridpts).addTo(map);
+        gridLayer.addTo(map);
+//        map.fitBounds(gridLayer.getBounds());
+ 
+        // Add control checkbox 
+
+        if (layercontrolLayer) {
+            layercontrolLayer.addOverlay(gridLayer,'Solution grid');
+        }
+        return gridLayer;
+    }
+           
+    function hoverGrid(e) {
+        var p = e.target.feature.properties;
+        var text = '(' + p.ix + ',' + p.iy + ') + M'
+             + p.mag + ' resid: ' + p.resid;
+        infoControl.update(text);    
+    }  
+    function removeGridLayer() {
+        if (!gridLayer) { return; }
+        map.removeLayer(gridLayer);
+        layercontrolLayer.removeLayer(gridLayer);
+        displayedgrid = undefined;
+    }
 
