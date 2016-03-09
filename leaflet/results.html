@@ -36,9 +36,10 @@
         var solutionsData;
         var mappoints = [];
         var graphpoints = [];
-        var solutionGrid;
+        var trialGrid;
 
         function loadData(ev) {
+            if (solutionsData && (evid == ev)) { return; }
             evid = ev;
             var inputname = 'data/out.' + evid + '.geojson';
             $.getJSON(inputname,onLoadSolutions);

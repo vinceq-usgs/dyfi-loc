@@ -6,19 +6,20 @@
         });
 
         var solutionMarkerOption = {
-                        radius : 4,
-                        color : 'black',
-                        weight : 1,
-                        fillColor : 'blue',                        
-                        fillOpacity : 0.8,
-                    };  
-        var gridMarkerOption = {
-                        radius : 2,
-                        color : 'black',
-                        weight : 1,
-                        fillColor : 'green',                        
-                        fillOpacity : 0.8,
-                    };  
+            radius : 4,
+            color : 'black',
+            weight : 1,
+            fillColor : 'blue',                        
+            fillOpacity : 0.8,
+                    };
+
+       var gridMarkerOption = {
+            radius : 4,
+            color : 'black',
+            weight : 1,
+            fillColor : 'white',                        
+            fillOpacity : 0.8,
+        }
 
         var solutionMarkerHighlight = {
                         color : 'red',
@@ -145,23 +146,19 @@
             }
             var p = pt.feature.properties;
             var coords = pt.feature.geometry.coordinates;
-            var popuptext;
+            var text;
             if (p.is_epicenter) {
-                popuptext = "Real epicenter:<br>M" + p.mag
-                    + " (" + coords[1] + "," + coords[0] + ")<br>";                 
+                text = "Real epicenter:<br>M" + p.mag
+                    + " (" + coords[1] + "," + coords[0] + ")";                 
             }
             else {
-                popuptext = "t: " + p.t + " (" + p.npts + " pts)<br>"
-                    + "M" + p.mag + " (" + p.ix + "," + p.iy + ")<br>"
+                text = "t: " + p.t + " (" + p.npts + " pts)<br>"
+                    + "Best magnitude: M" + p.mag + "<br>"
                     + "(" + coords[1] + "," + coords[0] + ")<br>"
-                    + "resid: " + p.resid; 
-            
+                    + "resid: " + p.resid + '<br>'
+                    + 'Click point to see trial grid'; 
             }
-            infoControl.update(popuptext);            
-//            popup = pt.bindPopup(popuptext)
-//                .on('popupopen',highlightMarker)
-//                .on('popupclose',resetMarker)
- //               .openPopup();
+            infoControl.update(text);            
 
             highlightMarker(e);
             graphHilight(p.t);
@@ -226,7 +223,8 @@
         }
 
         removeGridLayer();        
-        var text = 'Showing solution grid for t=' + t;
+        var text = 'Showing solution grid for t=' + t + '<br>'
+            + 'Mouseover point to see stats';
         infoControl.update(text);
 
        var inputname = 'data/grids/' + evid + '/grid.' + t + '.geojson';
@@ -235,7 +233,7 @@
     }
 
     function onLoadGrid(grid) {
-        solutionGrid = grid;
+        trialGrid = grid;
         showGrid(grid);
     }
         
@@ -250,7 +248,7 @@
  
             var ptLayer = L.geoJson(pt, {
                 pointToLayer: function(f,latlon) {
-                    return L.circleMarker(latlon,gridMarkerOption)
+                    return L.circleMarker(latlon,setGridMarkerStyle(f))
                         .on('mouseover',hoverGrid)
                         .on('click',removeGridLayer);
                 },
@@ -259,20 +257,20 @@
         }
         gridLayer = L.featureGroup(gridpts).addTo(map);
         gridLayer.addTo(map);
-//        map.fitBounds(gridLayer.getBounds());
  
         // Add control checkbox 
 
         if (layercontrolLayer) {
-            layercontrolLayer.addOverlay(gridLayer,'Solution grid');
+            layercontrolLayer.addOverlay(gridLayer,'Trial grid');
         }
         return gridLayer;
     }
            
     function hoverGrid(e) {
         var p = e.target.feature.properties;
-        var text = '(' + p.ix + ',' + p.iy + ') + M'
-             + p.mag + ' resid: ' + p.resid;
+        var text = '(' + p.ix + ',' + p.iy + ')<br>'
+            + 'M' + p.mag + ' (weighted mean)<br>resid: ' + p.resid + '<br>'
+            + '<br>Click point to remove';
         infoControl.update(text);    
     }  
     function removeGridLayer() {
@@ -282,3 +280,21 @@
         displayedgrid = undefined;
     }
 
+    function setGridMarkerStyle(f) {
+        var v = f.properties.resid;
+        var color =  v > 2.67 ? '#800026' :
+           v > 2.33 ? '#BD0026' :
+           v > 2.0 ? '#E31A1C' :
+           v > 1.67  ? '#FC4E2A' :
+           v > 1.33 ? '#FD8D3C' :
+           v > 1.0   ? '#FEB24C' :
+           v > 0.67   ? '#FED976' :
+                      '#FFEDA0';
+
+        options = {};
+        for (var prop in gridMarkerOption) {
+            options[prop] = gridMarkerOption[prop];
+}
+        options['fillColor'] = color;
+        return options;
+}
