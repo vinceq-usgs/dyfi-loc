@@ -2,7 +2,6 @@
 svg {
   font: 10px sans-serif;
 }
-
 .axis path {
     fill:none;
     stroke: black;
@@ -46,6 +45,20 @@ circle:hover {
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
 
+}
+.legend {
+    line-height: 18px;
+    color: black;
+    background: white;
+    border-radius : 5px;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-left: 8px;
+    margin-right: 8px;
+    opacity: 1.0;
 }
 
 

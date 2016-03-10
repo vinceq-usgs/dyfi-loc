@@ -1,7 +1,7 @@
 
 // Graphics definitions in this section
 
-var gridColorVals = {
+var gridColorsDiffMag = {
     2.33 : '#800026',
     2.0 : '#E31A1C' ,
     1.66 : '#FC4E2A' ,
@@ -17,7 +17,20 @@ var gridColorVals = {
     '-0.6' : '#0570b0' ,
     '-0.7' : '#045a8d' ,
     '-999' : '#023858',
+    title : '+/- diff M',
 }
+var gridColorsResid = {
+    '3.5' : '#800026',
+    '3.0' : '#E31A1C' ,
+    '2.5' : '#FC4E2A' ,
+    '2.0' : '#FD8D3C' ,
+    '1.5' : '#FEB24C' ,
+    '1.0' : '#FED976' ,
+    '0.5' : '#FFEDA0' ,
+    '0.0' : 'white',
+    title : 'Resid',
+}
+var gridColors = gridColorsDiffMag;
 
         var epicenterIcon = L.icon({
             iconUrl : "images/star.png",
@@ -71,7 +84,7 @@ var gridColorVals = {
             map.setView([34.0, -118.0],8);
             map.addLayer(osm);
 
-            L.control.mousePosition().addTo(map);
+            L.control.mousePosition({position:'bottomright'}).addTo(map);
             L.control.scale({imperial:0,maxWidth:200}).addTo(map);
             return map;
         }
@@ -300,23 +313,23 @@ var gridColorVals = {
 
         // Add gridcolor legend
 
-        if (1==0) {
-            var legend = L.control({position: 'bottomright'});
+        if (!gridLegend) {
+            gridLegend = L.control({position: 'bottomleft'});
+            gridLegend.onAdd = function(map) {
+                var div = L.DomUtil.create('div', 'info legend');
 
-            legend.onAdd = function (map) {
-                var div = L.DomUtil.create('div', 'info legend'),
-                    grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-                    labels = [];
-
-    // loop through our density intervals and generate a label with a colored square for each interval
-                for (var i = 0; i < grades.length; i++) {
+                var sorted = gridColors.sortedkeys;
+                div.innerHTML = gridColors.title + '<br>';
+        
+                for (var i = 0; i <  gridColors.length; i++) {
+                    var key = sorted[i];
+                    var color = gridColors[key];
                     div.innerHTML +=
-                        '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-                        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            '<i style="background:' + color + '"></i> ' + key + '<br>';
                 }
                 return div;
             }
-//            legend.addTo('map');
+            gridLegend.addTo(map);
         }
     }
            
@@ -336,10 +349,9 @@ var gridColorVals = {
     }
 
     function setGridMarkerStyle(f) {
-        var val = f.properties.mag;
-        var bestval = gridparentpt.properties.mag;
-        var v = (val - bestval);
-        var color = hash(v,gridColorVals);
+        var v = (gridColors === gridColorsResid) ? v = f.properties.resid
+            : (f.properties.mag - gridparentpt.properties.mag);
+        var color = hash(v,gridColors);
 
         options = {};
         for (var prop in gridMarkerOption) {
@@ -356,12 +368,14 @@ function hash(v,obj) {
     if (!obj.sortedkeys) {
         var sortedkeys = [];
         for (var key in obj) {
-            if (key=='hash') { continue; }
+            if (key=='sortedkeys') { continue; }
             if (!obj.hasOwnProperty(key)) { continue; }
+            if (key=='title') { continue; }
             sortedkeys.push(key);
         }
         sortedkeys.sort(function(a,b){return parseFloat(b)-parseFloat(a)});
         obj.sortedkeys = sortedkeys;
+        obj.length = sortedkeys.length;
     }
     for (var i=0; i<obj.sortedkeys.length; i++) {
         var key = obj.sortedkeys[i];
@@ -370,7 +384,7 @@ function hash(v,obj) {
         }
     }
     console.log('Out of bounds value ' + v);
-    var key = obj.sortedkeys[obj.sortedkeys.length - 1];
+    var key = obj.sortedkeys[obj.length - 1];
     return obj[key];
 }
 
