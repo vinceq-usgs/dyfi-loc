@@ -30,7 +30,7 @@ var gridColorsResid = {
     '0.0' : 'white',
     title : 'Resid',
 }
-var gridColors = gridColorsDiffMag;
+var gridColors = gridColorsResid;
 
         var epicenterIcon = L.icon({
             iconUrl : "images/star.png",
@@ -46,7 +46,7 @@ var gridColors = gridColorsDiffMag;
                     };
 
        var gridMarkerOption = {
-            radius : 4,
+            radius : 3,
             color : 'black',
             weight : 1,
             fillColor : 'white',                        
@@ -273,7 +273,6 @@ var gridColors = gridColorsDiffMag;
     }
         
     function showGrid(griddata) {
-        console.log('Now in showGrid().');
         var gridpts = [];
 
         // Remove old gridLayer if necessary
@@ -337,15 +336,32 @@ var gridColors = gridColorsDiffMag;
         var p = e.target.feature.properties;
         var text = '(' + p.ix + ',' + p.iy + ')<br>'
             + 'M' + p.mag + ' (weighted mean)<br>resid: ' + p.resid + '<br>'
-            + '<br>Click point to remove';
+            + '<br>Click any point to remove grid';
         infoControl.update(text);    
     } 
  
     function removeGridLayer() {
         if (!gridLayer) { return; }
+       layercontrolLayer.removeLayer(gridLayer);
         map.removeLayer(gridLayer);
-        layercontrolLayer.removeLayer(gridLayer);
+        
+        if (gridLegend) { gridLegend.removeFrom(map); }
+
+        gridLegend = undefined;
         gridparentpt = undefined;
+    }
+
+    function switchGrid(type) {
+        if ((type == 'resid') && (gridColors !== gridColorsResid)) {
+            gridColors = gridColorsResid;
+            if(trialgriddata) { onLoadGrid(trialgriddata); }
+            return;
+        } 
+        if ((type == 'diffmag') && (gridColors !== gridColorsDiffMag)) {
+            gridColors = gridColorsDiffMag;
+            if(trialgriddata) { onLoadGrid(trialgriddata); }
+            return;
+        } 
     }
 
     function setGridMarkerStyle(f) {
@@ -383,7 +399,7 @@ function hash(v,obj) {
             return obj[key];
         }
     }
-    console.log('Out of bounds value ' + v);
+    console.log('WARNING: Out of bounds value ' + v);
     var key = obj.sortedkeys[obj.length - 1];
     return obj[key];
 }

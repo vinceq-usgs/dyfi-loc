@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-//    <link rel="stylesheet" type="text/css" href="inc/leaflet.timeline.min.css" />
+    <link rel="stylesheet" type="text/css" href="inc/leaflet.timeline.min.css" />
     <link rel="stylesheet" type="text/css" href="inc/styles.css">
 
 </head>
@@ -22,7 +22,7 @@
     <script src="inc/dropdown.js"></script>
     <script src="inc/leafletmap.js"></script>
     <script src="inc/d3plot.js"></script>
-//    <script src="inc/leaflet.timeline.min.js"></script>
+    <script src="inc/leaflet.timeline.min.js"></script>
     <script>
 
         // Global variables
@@ -81,8 +81,10 @@
   <option value="ci14745580">ci14745580</option>
   <option value="ci37372672">ci37372672</option>
   <option value="ci15520985">ci15520985</option>
-
 </select>
+Select grid color mapping:  
+<button onClick="switchGrid('resid')">Residuals</button>
+<button onClick="switchGrid('diffmag')">M - M<sub>mean</sub></button>
 
 <div id="graph"></div>
 

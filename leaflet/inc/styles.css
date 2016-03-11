@@ -1,3 +1,7 @@
+body {
+    font: 12px sans-serif;
+}
+
 // D3 styles
 svg {
   font: 10px sans-serif;
@@ -9,8 +13,9 @@ svg {
 .axis {
     font-size:8pt;
     font-family:sans-serif;
-    fill:black;
-    stroke:black;
+}
+.axis.mag {
+    stroke:red;
 }
 .tick {
     fill:none;
@@ -34,6 +39,16 @@ circle:hover {
     opacity:0.6;
     r:3;
 }
+path.mag {
+    stroke:red;
+    fill:none;
+}
+circle.mag {
+    fill:red;
+    stroke:red;
+    opacity:1.0;
+    r:2;
+}
 .path {
     fill:none;
 }
@@ -41,10 +56,8 @@ circle:hover {
     padding: 5px 5px;
     font: 12px Arial, Helvetica, sans-serif;
     background: white;
-    background: rgba(255,255,255,0.8);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
-
 }
 .legend {
     line-height: 18px;
@@ -60,7 +73,14 @@ circle:hover {
     margin-right: 8px;
     opacity: 1.0;
 }
+button {
+  font: 12px sans-serif;
+  border-radius: 8px;
+  height: 24px;
+  background: white;
+    padding: 5px 5px;
 
+}
 
 
 

@@ -7,7 +7,6 @@
             height = 250;
 
         function drawGraph() {
-            console.log('Now in drawGraph.');
 
             // Take out epicenter point
             var data = [];
@@ -33,6 +32,9 @@
             svg.selectAll('circle.npts')
                 .data(data).enter()
                 .append('circle').attr('class','npts');
+            svg.selectAll('circle.mag')
+                .data(data).enter()
+                .append('circle').attr('class','mag');
 
 
             var x_extent = [0,d3.max(data,function(d){
@@ -41,6 +43,7 @@
                   return d.properties.resid})];
             var y_extent2 = [0,d3.max(data,function(d){
                   return d.properties.npts})];
+            var y_extent3 = [3,7];
 
             var x_scale = d3.scale.linear().range([margin,width-margin])
                 .domain(x_extent);
@@ -48,10 +51,13 @@
                 .domain(y_extent1);
             var y_scale2 = d3.scale.linear().range([height-margin,margin])
                 .domain(y_extent2);
+            var y_scale3 = d3.scale.linear().range([height-margin,margin])
+                .domain(y_extent3);
 
             var x_axis = d3.svg.axis().scale(x_scale);
             var y_axis1 = d3.svg.axis().scale(y_scale1).orient('left');
             var y_axis2 = d3.svg.axis().scale(y_scale2).orient('right');
+            var y_axis3 = d3.svg.axis().scale(y_scale3).orient('right');
 
             var line_resid = d3.svg.line()
                 .x(function(d){return x_scale(d.properties.t)})
@@ -59,14 +65,19 @@
             var line_npts = d3.svg.line()
                 .x(function(d){return x_scale(d.properties.t)})
                 .y(function(d){return y_scale2(d.properties.npts)});
+            var line_mag = d3.svg.line()
+                .x(function(d){return x_scale(d.properties.t)})
+                .y(function(d){return y_scale3(d.properties.mag)});
 
             svg.append('path')
                 .attr('d',line_resid(data))
                 .attr('class','path resid');
-
             svg.append('path')
                 .attr('d',line_npts(data))
                 .attr('class','path npts');
+            svg.append('path')
+                .attr('d',line_mag(data))
+                .attr('class','path mag');
 
             svg.selectAll('circle')
                 .attr('cx',function(d){return x_scale(d.properties.t)})
@@ -78,6 +89,9 @@
             svg.selectAll('circle.npts')
                 .attr('id',function(d){return 'graph_npts_' + d.properties.t})
                 .attr('cy',function(d){return y_scale2(d.properties.npts)});
+            svg.selectAll('circle.mag')
+                .attr('id',function(d){return 'graph_mag_' + d.properties.t})
+                .attr('cy',function(d){return y_scale3(d.properties.mag)});
             svg.selectAll('circle')
                 .attr('r',5)
                 .call(loadGraphPt);
@@ -101,6 +115,12 @@
                 .call(y_axis2).append('text')
                 .text('Number of responses')
                 .attr('transform','rotate(90,-10,0) translate(55)');
+            svg.append('g')
+                .attr('class','y axis mag')
+                .attr('transform','translate('+margin+',0)')
+                .call(y_axis3).append('text')
+                .text('Best magnitude')
+                .attr('transform','rotate(-90,35,0) translate(-120)');
 
             console.log('Now done with drawGraph.');
         }
