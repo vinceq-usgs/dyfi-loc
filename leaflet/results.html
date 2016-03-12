@@ -73,16 +73,28 @@
         map = initmap();
     </script>
 
-<select onchange="loadData(this.value)">
-  <option value="test">Select event</option>
-  <option value="nc72282711">nc72282711</option>
-  <option value="ci15296281">ci15296281</option>
-  <option value="nc71996906">nc71996906</option>
-  <option value="ci15481673">ci15481673</option>
-  <option value="ci14745580">ci14745580</option>
-  <option value="ci37372672">ci37372672</option>
-  <option value="ci15520985">ci15520985</option>
+<select div='select' onchange="loadData(this.value)">
+    <option value="test">Select event</option>
+  
+  <script>
+        function dirToOptions(data) {
+            $(data).find('a').attr('href',function(i,val) {
+                if (val.match(/\.(geojson)$/) ) { 
+                    var myid = val.split('.')[1];
+                    var text = '<option value="'+myid+'">'+myid+'</option>';
+                    $('select').append(text);
+                }
+            });
+        }
+        $(document).ready(function(){
+            $.ajax({
+                url: 'data/',
+                success: function (data) { dirToOptions(data); }
+            });
+        });
+    </script>
 </select>
+
 Select grid color mapping:  
 <button onClick="switchGrid('resid')">Residuals</button>
 <button onClick="switchGrid('diffmag')">M - M<sub>mean</sub></button>
@@ -93,5 +105,8 @@ Select grid color mapping:
         evid = 'ci15296281';
         loadData(evid);        
   </script>
+
+
+
 </body>
 
