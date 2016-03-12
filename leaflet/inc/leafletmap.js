@@ -108,6 +108,7 @@ var gridColors = gridColorsResid;
                 var ptLayer;
                 isEpicenter = solution.properties.is_epicenter;
                 if (isEpicenter) {
+                    epicenterpt = solution;
                     ptLayer = L.geoJson(solution, {
                         pointToLayer: function(f,latlon) {
                             m = L.marker(latlon, {
@@ -168,26 +169,32 @@ var gridColors = gridColorsResid;
 
         function mouseOver(e) {
             var pt;
+            var p;
+            var coords;
             if (e.target) {
                 pt = e.target;
+                f = pt.feature;
             }
-            else {
+            else if (e.feature) {
                 pt = e;
+                f = e.feature;
             }
-            var p = pt.feature.properties;
-            var coords = pt.feature.geometry.coordinates;
+            else { f = e; }
+            p = f.properties;
+            coords = f.geometry.coordinates;
+
             var text;
             if (p.is_epicenter) {
-                text = "Real epicenter:<br>M" + p.mag
+                text = "Actual event params:<br>M" + p.mag
                     + " (" + coords[1] + "," + coords[0] + ")";                 
+                infoControl.update(text);            
+                return; 
             }
-            else {
-                text = "t: " + p.t + " (" + p.npts + " pts)<br>"
-                    + "Best magnitude: M" + p.mag + "<br>"
-                    + "(" + coords[1] + "," + coords[0] + ")<br>"
-                    + "resid: " + p.resid + '<br>'
-                    + 'Click point to see trial grid'; 
-            }
+            text = "t: " + p.t + " (" + p.npts + " pts)<br>"
+                + "Best magnitude: M" + p.mag + "<br>"
+                + "(" + coords[1] + "," + coords[0] + ")<br>"
+                + "resid: " + p.resid + '<br>'
+                + 'Click point to see trial grid'; 
             infoControl.update(text);            
 
             hilightMarker(e);

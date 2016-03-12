@@ -25,7 +25,7 @@
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height);
-
+ 
             svg.selectAll('circle.resid')
                 .data(data).enter()
                 .append('circle').attr('class','resid');
@@ -35,7 +35,6 @@
             svg.selectAll('circle.mag')
                 .data(data).enter()
                 .append('circle').attr('class','mag');
-
 
             var x_extent = [0,d3.max(data,function(d){
                   return d.properties.t})];
@@ -91,7 +90,7 @@
                 .attr('cy',function(d){return y_scale2(d.properties.npts)});
             svg.selectAll('circle.mag')
                 .attr('id',function(d){return 'graph_mag_' + d.properties.t})
-                .attr('cy',function(d){return y_scale3(d.properties.mag)});
+                .attr('cy',function(d){return y_scale3(d.properties.mag); });
             svg.selectAll('circle')
                 .attr('r',5)
                 .call(loadGraphPt);
@@ -122,6 +121,19 @@
                 .text('Best magnitude')
                 .attr('transform','rotate(-90,35,0) translate(-120)');
 
+           var epicenter_size = 14;
+            svg.selectAll('image')
+                .data([ epicenterpt ]).enter()
+                .append('svg:image')
+                .attr('class','epicenterpt')
+                .attr("xlink:href","images/star.png")
+                .attr("x", function(d){return x_scale(d3.max(x_extent)) - epicenter_size/2;})
+                .attr("y", function(d){return y_scale3(d.properties.mag) - epicenter_size/2;})
+                .attr('width',epicenter_size)
+                .attr('height',epicenter_size)
+                .on('mouseover',mouseOverGraph);
+
+
             console.log('Now done with drawGraph.');
         }
 
@@ -129,6 +141,10 @@
         mappt = mappoints[e.properties.t];
         if (mappt) {
             mouseOver(mappt);
+            return;
+        }
+        if (e.properties.is_epicenter) {
+            mouseOver(e);
         }
     }
     

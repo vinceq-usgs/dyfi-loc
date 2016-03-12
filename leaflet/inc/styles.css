@@ -17,6 +17,10 @@ svg {
 .axis.mag {
     stroke:red;
 }
+.axis.mag text {
+    stroke:red;
+}
+
 .tick {
     fill:none;
     stroke:black;
@@ -48,6 +52,11 @@ circle.mag {
     stroke:red;
     opacity:1.0;
     r:2;
+}
+circle.epicenterpt {
+    fill:red;
+    stroke:red;
+    r:5;
 }
 .path {
     fill:none;
