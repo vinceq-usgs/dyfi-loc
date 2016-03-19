@@ -75,8 +75,7 @@
 
 <select div='select' onchange="loadData(this.value)">
     <option value="test">Select event</option>
-  
-  <script>
+    <script>
         function dirToOptions(data) {
             $(data).find('a').attr('href',function(i,val) {
                 if (val.match(/\.(geojson)$/) ) { 
@@ -89,7 +88,7 @@
         $(document).ready(function(){
             $.ajax({
                 url: 'data/',
-                success: function (data) { dirToOptions(data); }
+                success: function (d){ dirToOptions(d);}
             });
         });
     </script>

@@ -1,4 +1,5 @@
 #! /usr/local/bin/python3
+# -*- coding: utf-8 -*-
 
 """
 Created on Wed Feb 10 17:51:20 2016
@@ -19,11 +20,12 @@ DYFI observations). Each Point requires two properties:
 import argparse
 import os.path
 import sys
-import json
+import geojson
 from copy import copy
 from shutil import copyfile
 
 from modules import locate_dyfi
+#from modules import aggregate
 
 tmpgridfile = 'tmp/solutiongrid.geojson'
 
@@ -31,8 +33,8 @@ tmpgridfile = 'tmp/solutiongrid.geojson'
 
 parser = argparse.ArgumentParser(
     description = 'Run the locator on an event')
-parser.add_argument('infile',
-    help = 'inputfile (must be GeoJSON FeatureCollection)')
+parser.add_argument('evid',
+    help = 'comcat event ID OR inputfile (GeoJSON FeatureCollection)')
 parser.add_argument('--iterations',
     type = int,
     metavar = 'n',
@@ -53,10 +55,15 @@ parser.add_argument('--maxtime',
     metavar = 't',
     help = 'stop t seconds after first entry (default 1200)',
     default = 60 * 20)
+parser.add_argument('--utmspan',
+    type = int,
+    metavar = 'n',
+    help = 'Size of geocoded boxes in km (default 1)',
+    default = 1)
 parser.add_argument('--outputfile',
     type = str,
     metavar = 's',
-    help = 'output file (default is "output/out.[inputfile]")')
+    help = 'output file (default is "output/out.[evid].geojson")')
 
 try:
     args = parser.parse_args()
@@ -70,20 +77,22 @@ else:
     print('Running through all entries.')
     args.iterations
 
-    
-evid = os.path.basename(args.infile).split('.')[-2]
+evid = args.evid
+if 'geojson' in evid:
+    infile = evid
+    evid = os.path.basename(evid).split('.')[-2]
+else:
+    infile = './input/' + evid + '.geojson'
 
+data = geojson.load(open(infile))
 
-outfilename = 'output/out.' + os.path.basename(args.infile)
+outfilename = 'output/out.' + evid + '.geojson'
 if args.outputfile:
     print('Using output file %s.' % args.outputfile)
     outfilename = args.outputfile
 
 # DONE INITIAL SETUP
 
-# Load data
-
-data = json.load(open(args.infile))
 allpts = data['features']
 
 # Extract epicenter data
@@ -92,7 +101,6 @@ allpts = data['features']
 
 for i in range(0,len(allpts)):
     if 'is_epicenter' in allpts[i]['properties']: break
-
 
 evdata = allpts.pop(i)
 npts = len(allpts)
@@ -114,6 +122,8 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     this_pts = [ pt for pt in allpts if pt['properties']['t'] <= t ]
     this_npts = len(this_pts)
     if this_npts <= lastrun_npts + args.ptdiff: continue
+
+#    this_pts = aggregate.aggregate(this_pts,args.utmspan)
 
     iterations += 1
     best_result = False
@@ -148,7 +158,7 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     
     print('Writing to ' + outfilename)
     with open(outfilename, 'w') as outfile:
-        json.dump(allgeojson, outfile)
+        geojson.dump(allgeojson, outfile)
 
     webfilename = 'leaflet/data/out.' + evid + '.geojson'
     copyfile(outfilename,webfilename)

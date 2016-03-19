@@ -89,7 +89,7 @@ def find_starting_loc(pts):
     maxcdi = 0.0
     bestpt = 0
     for pt in pts:
-        cdi = float(pt['properties']['user_cdi'])
+        cdi = pt['properties']['user_cdi']
         if cdi > maxcdi:
             cdi = maxcdi
             bestpt = pt
@@ -107,8 +107,8 @@ def get_offset_Point(initloc,ix,iy):
     iy          y-offset in km (positive is North)
     """
     
-    lat0 = float(initloc['geometry']['coordinates'][1])
-    lon0 = float(initloc['geometry']['coordinates'][0])
+    lat0 = initloc['geometry']['coordinates'][1]
+    lon0 = initloc['geometry']['coordinates'][0]
     lat = lat0 + (iy / 111.12)
     lon = lon0 + (ix / 111.12) * math.cos(lat * 0.0174532925);
     lat = round(lat,PRECISION)
@@ -142,7 +142,7 @@ def trylocation_A(loc,pts):
         totalwt2 = 0        # Cumulative total of squared weights
         for pt in pts:
             # Todo: Implement this as Point object property            
-            ii = float(pt['properties']['user_cdi'])
+            ii = pt['properties']['user_cdi']
             dist = pt['properties']['_dist']
             tryii = ipe(trymag,dist,False)
             
@@ -182,7 +182,7 @@ def trylocation_B(loc,pts):
     # for each observation
     for pt in pts:
         # Todo: Implement this as Point object property            
-        ii = float(pt['properties']['user_cdi'])
+        ii = pt['properties']['user_cdi']
         dist = pt['properties']['_dist']
         trymag = ipe(ii,dist,True)
 
@@ -209,6 +209,7 @@ def find_dist(pts,loc):
     Iterate through all observations and calculate distance to loc
     Also calculates distance-based weight (see BW1997)
     Returns number of points calculated
+    Weight is modified by nresp (when event entries are geocoded)
     
     Arguments:
     pts    geojson feature collection (list of GeoJSON points)
@@ -227,6 +228,10 @@ def find_dist(pts,loc):
             wt = 0.1
         else:
             wt = 0.1 + math.cos(math.pi/2*dist/150)
+
+        try:
+            wt *= pt['properties']['nresp']
+        except KeyError: pass
 
         dist = round(dist,PRECISION)
         wt = round(wt,PRECISION)
