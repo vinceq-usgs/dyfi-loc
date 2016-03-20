@@ -11,6 +11,8 @@ Sanitize GeoJSON with inadvertent strings instead of float numbers
 import argparse
 import json
 import geojson
+from shutil import copyfile
+
 
 number_props = [ 'confidence','damage','felt','furniture','motion','picture',
                 'reaction','shelf','stand','subid','t','user_cdi',
@@ -27,8 +29,8 @@ f = data['features']
 for pt in f:
     coords = pt['geometry']['coordinates']
     p = pt['properties']
-    lat = float(coords[0])
-    lon = float(coords[1])
+    lat = float(coords[1])
+    lon = float(coords[0])
     if 'subid' in p : id = p['subid']
     else : id = 0
     
@@ -59,4 +61,5 @@ allgeojson = geojson.FeatureCollection(features)
 with open('out.geojson', 'w') as outfile:
     geojson.dump(allgeojson, outfile)
 
+copyfile('out.geojson',args.file)
 

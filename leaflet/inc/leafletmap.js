@@ -101,9 +101,6 @@ var gridColors = gridColorsResid;
             for (i=0; i<data.features.length; i++) {
                 solution = data.features[i];
                 p = solution.properties;
-                // Have to reverse this since geojson format is (lon,lat)
-                // and leaflet format is (lat,lon)
-                coords = solution.geometry.coordinates.slice().reverse();
                 var popuptext;
                 var ptLayer;
                 isEpicenter = solution.properties.is_epicenter;
@@ -131,20 +128,25 @@ var gridColors = gridColorsResid;
                     });                                                    
 
                     // Also store this for intra-solution path
+                    // Reverse this since geojson format is (lon,lat)
+                    // and leaflet format is (lat,lon)
+                    coords = solution.geometry.coordinates.slice().reverse();
                     lineArray.push(coords);
                 }          
 
-            // Add to solutions layer
+                // Add to solutions layer
+                // Note epicenter is part of solutions layer
                 solutionsArray.push(ptLayer);
             }
+
             // Now plot solution paths
 
             if (lineLayer) {
                 map.removeLayer(lineLayer);
             } 
-            lineLayer = L.polyline(lineArray, solpathOption).addTo(map);
+            lineLayer = L.polyline(lineArray,solpathOption).addTo(map);
 
-            // Now plot solutions
+            // Now plot solutions on top of path
 
             if (solutionLayer) {
                 map.removeLayer(solutionLayer);
@@ -181,7 +183,7 @@ var gridColors = gridColorsResid;
             }
             else { f = e; }
             p = f.properties;
-            coords = f.geometry.coordinates;
+            coords = f.geometry.coordinates.slice();
 
             var text;
             if (p.is_epicenter) {
