@@ -84,8 +84,9 @@
     <script>
         function dirToOptions(data) {
             $(data).find('a').attr('href',function(i,val) {
-                if (val.match(/\.(geojson)$/) ) { 
+                if (val.match(/\.(geojson)$/)) {
                     var myid = val.split('.')[1];
+                    if (val.match(/aggregated/)) { return; } 
                     var text = '<option value="'+myid+'">'+myid+'</option>';
                     $('select').append(text);
                 }
