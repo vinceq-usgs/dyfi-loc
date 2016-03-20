@@ -25,6 +25,11 @@
     <script src="inc/leaflet.timeline.min.js"></script>
     <script>
 
+        // Disable caching of AJAX responses
+        $.ajaxSetup ({
+            cache: false
+        });
+
         // Global variables
         var evid;
         var hilightedpt;
@@ -50,6 +55,7 @@
             if (solutionsdata && (evid == ev)) { return; }
             evid = ev;
             var inputname = 'data/out.' + evid + '.geojson';
+            console.log('Loading ' + inputname);
             $.getJSON(inputname,onLoadSolutions);
         }
 
@@ -85,6 +91,10 @@
                 }
             });
         }
+
+// This actually loads the directory. You might need to configure
+// your http server to accept this. 
+
         $(document).ready(function(){
             $.ajax({
                 url: 'data/',
