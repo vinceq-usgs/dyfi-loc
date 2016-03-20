@@ -97,7 +97,7 @@ var gridColors = gridColorsResid;
 
             if (gridLayer) { removeGridLayer(); }
 
-
+            console.log('Drawing ' + data.features.length + ' points.')
             for (i=0; i<data.features.length; i++) {
                 solution = data.features[i];
                 p = solution.properties;
