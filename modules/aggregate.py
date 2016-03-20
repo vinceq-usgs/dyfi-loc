@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 """
 Created on Fri Mar 11 21:08:39 2016
 
@@ -11,8 +12,10 @@ aggreagate_utm.py :  Module to take GeoJSON feature collection and return
 
 import math
 import geojson
-from modules.utm import from_latlon,to_latlon
+from modules.utm import from_latlon,to_latlon,OutOfRangeError
 from modules import cdi
+
+PRECISION = 4
 
 def aggregate(pts,resolution):
     """
@@ -41,12 +44,12 @@ def aggregate(pts,resolution):
     rawresults = {}
     print('Aggregating points:')
     for pt in pts:
-        if not pt['properties']['loc']: continue
+        if 'loc' not in pt['properties']: continue
         loc = pt['properties']['loc']
         if loc in rawresults:
             rawresults[loc].append(pt)
         else:
-            rawresults[loc] = [pt]
+            rawresults[loc] = [ pt ]
             
     results = []
     for loc,pts in rawresults.items():
@@ -91,7 +94,10 @@ def getAggregation(pt,digit):
     geom = pt['geometry']['coordinates']
     lat = geom[1]
     lon = geom[0]
-    loc = from_latlon(lat,lon)
+    try: 
+        loc = from_latlon(lat,lon)
+    except OutOfRangeError:
+        return
     if not loc: return
 
     x,y,zonenum,zoneletter = loc
@@ -110,6 +116,8 @@ def getCoords(loc,resolutionMeters):
     y = int(y) + resolutionMeters/2
     zone = int(zone)
     lat,lon = to_latlon(x,y,zone,zoneletter)
+    lat = round(lat,PRECISION)
+    lon = round(lon,PRECISION)
     return (lon,lat)
 
     
