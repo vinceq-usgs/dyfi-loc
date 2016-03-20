@@ -43,7 +43,7 @@ def locate(pts):
     """
 
     counter = 0
-    initloc = find_starting_loc(pts)
+    initloc = getStartingPt(pts)
     bestresid = 9999
     bestloc = initloc
     saveresults = []
@@ -56,10 +56,13 @@ def locate(pts):
     for ix in xgridrange:
         for iy in ygridrange:
             counter += 1
-            if counter % 1000 == 0:
-                print(counter,': Best loc ',bestloc)
+            if counter % 100 == 0:
+                print('%i: Best loc: (%i,%i)' % 
+                    (counter,bestloc['properties']['ix'],
+                     bestloc['properties']['iy'])
+                 )
 
-            tryloc = get_offset_Point(initloc,ix,iy)
+            tryloc = getOffsetPt(initloc,ix,iy)
             result = trylocation(tryloc,pts)
             
             mag = result['mag']
@@ -77,7 +80,7 @@ def locate(pts):
         json.dump(allgeojson,outfile)
     return bestloc
                 
-def find_starting_loc(pts):
+def getStartingPt(pts):
     """
     Find best location from observations (i.e. highest intensity)
     Returns GeoJSON point
@@ -96,7 +99,7 @@ def find_starting_loc(pts):
             
     return bestpt
 
-def get_offset_Point(initloc,ix,iy):
+def getOffsetPt(initloc,ix,iy):
     """
     Get longitude/latitude from epicenter and x/y offset (in km)
     Returns GeoJSON point
@@ -134,7 +137,7 @@ def trylocation_A(loc,pts):
     for trymag in magrange:    
         # If this is the first run, recalculate distances and weights
         if firstrun:
-            find_dist(pts,loc)
+            getDistancesWts(pts,loc)
             firstrun = False
             
         # Now iterate through each point and add up the resids
@@ -171,7 +174,7 @@ def trylocation_B(loc,pts):
     loc    GeoJSON point (dict)
     """
     
-    find_dist(pts,loc)
+    getDistancesWts(pts,loc)
 
     totalmag = 0
     totalresid2 = 0     # Cumulative total of squared resids
@@ -204,7 +207,7 @@ def trylocation_B(loc,pts):
     results = { 'mag': round(meanmag,1), 'resid' : round(resid,PRECISION) }
     return results
        
-def find_dist(pts,loc):
+def getDistancesWts(pts,loc):
     """
     Iterate through all observations and calculate distance to loc
     Also calculates distance-based weight (see BW1997)
@@ -230,7 +233,8 @@ def find_dist(pts,loc):
             wt = 0.1 + math.cos(math.pi/2*dist/150)
 
         try:
-            wt *= pt['properties']['nresp']
+            nresp = pt['properties']['nresp']
+            if nresp > 0: wt *= nresp
         except KeyError: pass
 
         dist = round(dist,PRECISION)
@@ -238,6 +242,6 @@ def find_dist(pts,loc):
         pt['properties']['_dist'] = dist
         pt['properties']['_wt'] = wt        
         counter += 1
-        
+
     return(counter)
 

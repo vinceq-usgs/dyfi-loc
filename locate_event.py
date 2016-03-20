@@ -25,7 +25,7 @@ from copy import copy
 from shutil import copyfile
 
 from modules import locate_dyfi
-#from modules import aggregate
+from modules import aggregate
 
 tmpgridfile = 'tmp/solutiongrid.geojson'
 
@@ -123,12 +123,12 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     this_npts = len(this_pts)
     if this_npts <= lastrun_npts + args.ptdiff: continue
 
-#    this_pts = aggregate.aggregate(this_pts,args.utmspan)
+    this_pts = aggregate.aggregate(this_pts,args.utmspan)
 
     iterations += 1
     best_result = False
-    print('%i: Running otime + %i mins (%i entries)...' %
-        (iterations,t/60,this_npts))
+    print('%i: Running otime + %i mins (%i entries in %i locations)...' %
+        (iterations,t/60,this_npts,len(this_pts)))
     result = locate_dyfi.locate(this_pts)
 
     # Copy solution grid to leaflet output
