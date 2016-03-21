@@ -42,25 +42,31 @@ def aggregate(pts,resolution):
         pt['properties']['loc'] = loc
                 
     rawresults = {}
+    earliesttimes = {}
     print('Aggregating points:')
     for pt in pts:
         if 'loc' not in pt['properties']: continue
         loc = pt['properties']['loc']
+        t = pt['properties']['t']
         if loc in rawresults:
             rawresults[loc].append(pt)
+            if t < earliesttimes[loc]: earliesttimes[loc] = t 
         else:
             rawresults[loc] = [ pt ]
+            earliesttimes[loc] = t
+
             
     results = []
     for loc,pts in rawresults.items():
-        # print('Loc ' + loc + ' has ' + str(len(pts)) + ' results.')
 
+        print('Calculating CDI for ' + loc + ' (' + str(len(pts)) + ' pts)')
         user_cdi = cdi.calculate(pts)
         # geom = getBoundingPolygon(loc,resolutionMeters)        
         coords = getCoords(loc,resolutionMeters)
         props = {
             'user_cdi' : user_cdi,
-            'nresp' : len(pts)
+            'nresp' : len(pts),
+            't' : earliesttimes[loc]
         }
         pt = geojson.Feature(
             geometry=geojson.Point(coords),
