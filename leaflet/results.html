@@ -36,14 +36,15 @@
         var gridparentpt;
         var trialgriddata;
         var solutionsdata;
+        var responsesdata;
         var epicenterpt;
-
 
         // Globally track layers
         var map;
         var mapLayers;
         var graphLayers;
         var gridLayer;
+        var responsesLayer;
         var infoControl;
         var gridLegend;
 
@@ -68,6 +69,18 @@
             mapLayers = drawMap();
             graphLayers = drawGraph();
             infoControl = drawInfoControl();
+        }
+
+        function loadResponses(ev) {
+            if (responsesdata && (evid == ev)) { return; }
+            var inputname = 'data/aggregated.' + evid + '.geojson';
+            console.log('Loading ' + inputname);
+            $.getJSON(inputname,onLoadResponses);
+        }
+
+        function onLoadResponses(data) {
+            responsesdata = data;
+            responsesLayer = drawResponses();
         }
 
  
@@ -114,6 +127,7 @@ Select grid color mapping:
    <script>
         evid = 'ci15296281';
         loadData(evid);        
+        loadResponses(evid);
   </script>
 
 

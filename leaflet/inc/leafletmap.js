@@ -32,38 +32,45 @@ var gridColorsResid = {
 }
 var gridColors = gridColorsResid;
 
-        var epicenterIcon = L.icon({
-            iconUrl : "images/star.png",
-            iconSize : 16,
-        });
+var epicenterIcon = L.icon({
+    iconUrl : "images/star.png",
+    iconSize : 16,
+});
 
-        var solutionMarkerOption = {
-            radius : 4,
-            color : 'black',
-            weight : 1,
-            fillColor : 'blue',                        
-            fillOpacity : 1.0,
-                    };
+var solutionMarkerOption = {
+    radius : 4,
+    color : 'black',
+    weight : 1,
+    fillColor : 'blue',                        
+    fillOpacity : 1.0,
+};
 
-       var gridMarkerOption = {
-            radius : 3,
-            color : 'black',
-            weight : 1,
-            fillColor : 'white',                        
-            fillOpacity : 1.0,
-        }
+var gridMarkerOption = {
+    radius : 3,
+    color : 'black',
+    weight : 1,
+    fillColor : 'white',                        
+    fillOpacity : 1.0,
+}
 
-        var solutionMarkerHilight = {
-                        color : 'red',
-                        weight : 4,
-                    };  
+var responseMarkerOption = {
+    radius : 1,
+    weight : 0,
+    fillColor : 'green',                        
+    fillOpacity : 0.5,
+}
 
-        var solpathOption = {
-                    color:'blue',
-                    weight:2,
-                    opacity:0.5,
-                    dashArray:'10,10',
-                }
+var solutionMarkerHilight = {
+    color : 'red',
+    weight : 4,
+};  
+
+var solpathOption = {
+    color:'blue',
+    weight:2,
+    opacity:0.5,
+    dashArray:'10,10',
+}
 
 // Javascript functions in this section
 
@@ -71,16 +78,17 @@ var gridColors = gridColorsResid;
         var lineLayer;
         var layercontrolLayer;
 
-        function initmap() {
 // set up the map
+
+        function initmap() {
             map = new L.Map('map');
 
-// create the tile layer with correct attribution
+            // create the tile layer with correct attribution
             var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
             var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
             var osm = new L.TileLayer(osmUrl, {minZoom: 4, maxZoom: 16, attribution: osmAttrib});		
 
-// start the map in Southern California
+            // start the map in Southern California
             map.setView([34.0, -118.0],8);
             map.addLayer(osm);
 
@@ -88,7 +96,8 @@ var gridColors = gridColorsResid;
             L.control.scale({imperial:0,maxWidth:200}).addTo(map);
             return map;
         }
-// Map functions
+
+// Draw solutions and points, and setup mouseover events
 
         function drawMap() {
             data = solutionsdata;
@@ -227,6 +236,8 @@ var gridColors = gridColorsResid;
             pt.setStyle(solutionMarkerOption);
         }
 
+// Handle information control
+
     function drawInfoControl() {
         if (infoControl) {
             infoControl.removeFrom(map); 
@@ -240,7 +251,6 @@ var gridColors = gridColorsResid;
             return this._div;
         };
  
-// method that we will use to update the control
         infoControl.update = function (text) {
             this._div.innerHTML = "<div class='infoControl'>"+text+"</div>";
         };
@@ -249,7 +259,9 @@ var gridColors = gridColorsResid;
         return infoControl;
     }
 
+// Handle click event
 // Calls by map pt and graph pt have different sources
+
     function clickSolution(e) {
         var pt;
         if (e.target) { pt = e.target.feature; } else { pt = e; }
@@ -268,6 +280,8 @@ var gridColors = gridColorsResid;
         var inputname = 'data/grids/' + evid + '/grid.' + t + '.geojson';
         $.getJSON(inputname,onLoadGrid);
     }
+
+// Trial grid loading, display, and events
 
     function onLoadGrid(griddata) {
         if (gridLayer) {
@@ -386,6 +400,35 @@ var gridColors = gridColorsResid;
 
         return options;
     }
+
+// Responses grid display
+
+function drawResponses() {
+    data = responsesdata;
+
+    responsesArray = [];
+    console.log('Drawing ' + data.features.length + ' points.')
+    for (i=0; i<data.features.length; i++) {
+        response = data.features[i];
+        p = response.properties;
+        var popuptext;
+        var ptLayer = L.geoJson(response, {
+            pointToLayer: function(f,latlon) {
+                m = L.circleMarker(latlon, responseMarkerOption);
+                return m;
+            }
+        });
+        responsesArray.push(ptLayer);
+     }
+    responsesLayer = L.featureGroup(responsesArray).addTo(map);
+ 
+    // Add to layer control
+   if (layercontrolLayer) {
+        layercontrolLayer.addOverlay(responsesLayer,'Geocoded responses');
+    }
+    return(responsesLayer);
+}
+
 
 // Javascript doesn't have sorted dict, use this instead
 
