@@ -72,7 +72,6 @@
         }
 
         function loadResponses(ev) {
-            if (responsesdata && (evid == ev)) { return; }
             var inputname = 'data/aggregated.' + evid + '.geojson';
             console.log('Loading ' + inputname);
             $.getJSON(inputname,onLoadResponses);
@@ -92,7 +91,7 @@
         map = initmap();
     </script>
 
-<select div='select' onchange="loadData(this.value)">
+<select div='select' onchange="loadData(this.value); loadResponses(this.value)">
     <option value="test">Select event</option>
     <script>
         function dirToOptions(data) {

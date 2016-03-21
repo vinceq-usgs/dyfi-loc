@@ -420,6 +420,11 @@ function drawResponses() {
         });
         responsesArray.push(ptLayer);
      }
+
+    if (responsesLayer) {
+        map.removeLayer(responsesLayer);
+    }
+
     responsesLayer = L.featureGroup(responsesArray).addTo(map);
  
     // Add to layer control
