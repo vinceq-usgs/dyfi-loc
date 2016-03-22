@@ -54,7 +54,7 @@ var gridMarkerOption = {
 }
 
 var responseMarkerOption = {
-    radius : 1,
+    radius : 2,
     weight : 0,
     fillColor : 'green',                        
     fillOpacity : 0.5,
@@ -93,7 +93,7 @@ var solpathOption = {
             map.addLayer(osm);
 
             L.control.mousePosition({position:'bottomright'}).addTo(map);
-            L.control.scale({imperial:0,maxWidth:200}).addTo(map);
+            L.control.scale({imperial:0,maxWidth:100,position:'bottomright'}).addTo(map);
             return map;
         }
 
@@ -401,34 +401,39 @@ var solpathOption = {
         return options;
     }
 
-// Responses grid display
+// Responses display
 
 function drawResponses() {
-    data = responsesdata;
-
-    responsesArray = [];
-    console.log('Drawing ' + data.features.length + ' points.')
-    for (i=0; i<data.features.length; i++) {
-        response = data.features[i];
-        p = response.properties;
-        var popuptext;
-        var ptLayer = L.geoJson(response, {
-            pointToLayer: function(f,latlon) {
-                m = L.circleMarker(latlon, responseMarkerOption);
-                return m;
-            }
-        });
-        responsesArray.push(ptLayer);
-     }
 
     if (responsesLayer) {
         map.removeLayer(responsesLayer);
     }
 
-    responsesLayer = L.featureGroup(responsesArray).addTo(map);
+    if (timeControl) {
+        timeControl.removeFrom(map);
+        map.removeLayer(timeControl);
+    }
+
+    timeControl = L.timelineSliderControl({
+        start : 1,
+        end : 1200,
+    });
  
-    // Add to layer control
-   if (layercontrolLayer) {
+    responsesArray = [];
+    console.log('Drawing ' + responsesdata.features.length + ' points.')
+    responsesLayer = L.timeline(responsesdata, {
+        getInterval : function(e) {
+            return { start:e.properties.t, end:1200 };
+        },
+        pointToLayer: function(e,latlon) {
+            return L.circleMarker(latlon,responseMarkerOption);
+        },
+    });
+    timeControl.addTo(map);
+    timeControl.addTimelines(responsesLayer);
+    responsesLayer.addTo(map).bringToBack();
+
+    if (layercontrolLayer) {
         layercontrolLayer.addOverlay(responsesLayer,'Geocoded responses');
     }
     return(responsesLayer);

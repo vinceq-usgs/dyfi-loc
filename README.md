@@ -3,7 +3,7 @@ DYFI locator. Given a batch of DYFI entries (point intensities), determine the e
 
 The goal is to provide a solution (magnitude, location, time, uncertainty?) as a dyfi-loc product to PDL. This will be used by Hydra to help trigger smaller felt-but-underinstrumented events. Paul also discussed receiving TED location (which should always happen first) as the seed for starting this procedure and initial location.
 
-Location Viewer
+Location Viewer Installation
 ---------------
 
 To use the Location Viewer:
@@ -11,16 +11,22 @@ To use the Location Viewer:
 1. Install this repository.
 2. Start a local HTTP server by entering 'cd leaflet; ./httpserver &'
 3. Point your browser to 'http://localhost:8000/results.html
-4. Use the Event Selector menu in the lower left corner to select an event.
-5. Hover mouse pointer over solutions in map or graph to see info.
+
+Location Viewer Features
+-----
+- Use the Event Selector menu in the lower left corner to select an event.
+- Hover mouse pointer over solutions in map or graph to see info.
+- Click on a solution to show the trial grid that produced that solution. Click again to remove from display.
+- Press 'play' on slider bar to see aggregated responses.
 
 Locator Algorithm
 ---------
-1. Load a collection of unassociated individual responses with location (geocoded) and intensities. These will be "observation".
-2. Determine the location with largest intensity; use that as the starting point. Alternatively, use a weighted (by squared intensity) spatial average. This will be the initial search location.
-3. Set up a search grid (possibly related to max int) centered on the initial location.
-4. Iterate over each node of the search grid.
-5. The next step depends on which residual calculation method is used.
+1. Load a collection of unassociated individual responses with geocoded location and intensities. 
+2. Run aggregator to create geocoded boxes.
+3. Determine the location with largest intensity; use that as the starting point. Alternatively, use a weighted (by squared intensity) spatial average. This will be the initial search location.
+4. Set up a search grid (possibly related to max int) centered on the initial location.
+5. Iterate over each node of the search grid.
+6. The next step depends on which residual calculation method is used.
   - Version A (old Locator method):
     1. Iterate over test magnitudes (and depths? depending on IPE):
       1. Assume this node is a "test epicenter" with given magnitude. 

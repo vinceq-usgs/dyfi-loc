@@ -90,6 +90,17 @@ button {
     padding: 5px 5px;
 
 }
+.leaflet-bottom.leaflet-left{
+  width: 80%;
+  height: 15%;
+}
+.leaflet-control-container .leaflet-timeline-controls{
+  width: 100%;
+  margin: 1;
+  margin-bottom: 1px;
+  padding: 1px 1px;
+  border-radius: 1px;
+}
 
 
 
