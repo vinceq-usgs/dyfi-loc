@@ -60,11 +60,11 @@ def aggregate(pts,resolution):
     for loc,pts in rawresults.items():
 
         print('Calculating CDI for ' + loc + ' (' + str(len(pts)) + ' pts)')
-        user_cdi = cdi.calculate(pts)
+        intensity = cdi.calculate(pts)
         # geom = getBoundingPolygon(loc,resolutionMeters)        
         coords = getCoords(loc,resolutionMeters)
         props = {
-            'user_cdi' : user_cdi,
+            'cdi' : intensity,
             'nresp' : len(pts),
             't' : earliesttimes[loc]
         }
