@@ -62,7 +62,7 @@ var solpathOption = {
     color:'blue',
     weight:2,
     opacity:0.5,
-    dashArray:'5,5',
+    dashArray:'1,5',
 }
 
 // Done with graphics definitions

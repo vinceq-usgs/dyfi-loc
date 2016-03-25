@@ -1,9 +1,22 @@
 
 var responseMarkerOption = {
-    radius : 2,
-    weight : 0,
+    radius : 3,
+    weight : 1,
+    color : 'black',
     fillColor : 'green',
-    fillOpacity : 0.5
+    fillOpacity : 1.0,
+};
+
+var colorsCdi = {
+    9 : '#ec2516',
+    8 : '#ff701f',
+    7 : '#fdca2c',
+    6 : '#f7f835',
+    5 : '#95f879',
+    4 : '#7efbdf',
+    3 : '#82f9fb',
+    2 : '#dfe6fe',
+    1 : 'white',
 };
 
 var tfirst = 1;
@@ -35,7 +48,16 @@ function drawResponses() {
             return { start:e.properties.t, end:tlast };
         },
         pointToLayer: function(e,latlon) {
-            return L.circleMarker(latlon,responseMarkerOption);
+            var cdi = parseInt(e.properties.user_cdi);
+
+            var options = [];
+            for (var prop in responseMarkerOption) {
+                options[prop] = responseMarkerOption[prop];
+            }
+//            console.log('Got ' + cdi + ' ' + colorsCdi[cdi]);
+            options['fillColor'] = colorsCdi[cdi];
+//            if (cdi <5) { options['fillOpacity'] = 0; options['stroke'] = 0; }
+            return L.circleMarker(latlon,options);
         },
     });
     timeControl.addTo(map);
