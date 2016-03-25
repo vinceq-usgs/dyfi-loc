@@ -8,6 +8,8 @@
         var tnow;
         var lineFunc;
         var linePlot;
+        var t0 = 1;
+        var tlast = 1200;
 
         function drawGraph() {
 
@@ -151,8 +153,6 @@
                     linePlot.attr('d',line_t([3,7]));
                 }
             }
-            console.log('Moving lineFunc to 1.');
-            drawPlotTimeline(1);
         }
 
     function mouseOverGraph(e) {

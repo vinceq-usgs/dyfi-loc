@@ -11,14 +11,13 @@ var gridColorsDiffMag = {
     0.33 : '#FFEDA0' ,
     '-0.1' : 'white',
     '-0.2' : '#d0d1e6' ,
-    '-0.3' : '#a6bddb' ,
     '-0.4' : '#74a9cf' ,
-    '-0.5' : '#3690c0' ,
     '-0.6' : '#0570b0' ,
-    '-0.7' : '#045a8d' ,
+    '-0.8' : '#045a8d' ,
     '-999' : '#023858',
     title : '+/- diff M',
-}
+};
+
 var gridColorsResid = {
     '3.5' : '#800026',
     '3.0' : '#E31A1C' ,
@@ -29,7 +28,8 @@ var gridColorsResid = {
     '0.5' : '#FFEDA0' ,
     '0.0' : 'white',
     title : 'Resid',
-}
+};
+
 var gridColors = gridColorsResid;
 
 var epicenterIcon = L.icon({
@@ -51,14 +51,7 @@ var gridMarkerOption = {
     weight : 1,
     fillColor : 'white',                        
     fillOpacity : 1.0,
-}
-
-var responseMarkerOption = {
-    radius : 2,
-    weight : 0,
-    fillColor : 'green',                        
-    fillOpacity : 0.5,
-}
+};
 
 var solutionMarkerHilight = {
     color : 'red',
@@ -72,7 +65,7 @@ var solpathOption = {
     dashArray:'5,5',
 }
 
-// Javascript functions in this section
+// Done with graphics definitions
 
         var solutionLayer;
         var lineLayer;
@@ -236,7 +229,7 @@ var solpathOption = {
             pt.setStyle(solutionMarkerOption);
         }
 
-// Handle information control
+// Handle info control
 
     function drawInfoControl() {
         if (infoControl) {
@@ -260,10 +253,12 @@ var solpathOption = {
     }
 
 // Handle click event
-// Calls by map pt and graph pt have different sources
 
     function clickSolution(e) {
         var pt;
+
+        // Calls by map pt and graph pt have different sources
+        // so check for each possibility    
         if (e.target) { pt = e.target.feature; } else { pt = e; }
         var t = pt.properties.t;
     
@@ -336,7 +331,7 @@ var solpathOption = {
         // Add gridcolor legend
 
         if (!gridLegend) {
-            gridLegend = L.control({position: 'bottomleft'});
+            gridLegend = L.control({position: 'topleft'});
             gridLegend.onAdd = function(map) {
                 var div = L.DomUtil.create('div', 'info legend');
 
@@ -390,7 +385,7 @@ var solpathOption = {
     function setGridMarkerStyle(f) {
         var v = (gridColors === gridColorsResid) ? v = f.properties.resid
             : (f.properties.mag - gridparentpt.properties.mag);
-        var color = hash(v,gridColors);
+        var color = sortedhash(v,gridColors);
 
         options = {};
         for (var prop in gridMarkerOption) {
@@ -401,52 +396,9 @@ var solpathOption = {
         return options;
     }
 
-// Responses display
-
-function drawResponses() {
-
-    if (responsesLayer) {
-        map.removeLayer(responsesLayer);
-        responsesLayer.clearAllEventListeners();
-    }
-
-    if (timeControl) {
-        timeControl.removeFrom(map);
-        map.removeLayer(timeControl);
-    }
-
-    timeControl = L.timelineSliderControl({
-        start : 1,
-        end : 1200,
-    });
- 
-    responsesArray = [];
-    console.log('Drawing ' + responsesdata.features.length + ' points.')
-    responsesLayer = L.timeline(responsesdata, {
-        getInterval : function(e) {
-            return { start:e.properties.t, end:1200 };
-        },
-        pointToLayer: function(e,latlon) {
-            return L.circleMarker(latlon,responseMarkerOption);
-        },
-    });
-    timeControl.addTo(map);
-    timeControl.addTimelines(responsesLayer);
-    responsesLayer.addTo(map).bringToBack();
-    responsesLayer.on('change',function(e) {
-        drawPlotTimeline(e.target.time);
-    });
-
-    if (layercontrolLayer) {
-        layercontrolLayer.addOverlay(responsesLayer,'Geocoded responses');
-    }
-    return(responsesLayer);
-}
-
-
 // Javascript doesn't have sorted dict, use this instead
 
-function hash(v,obj) {
+function sortedhash(v,obj) {
     if (!obj.sortedkeys) {
         var sortedkeys = [];
         for (var key in obj) {

@@ -23,7 +23,9 @@
     <script src="inc/leafletmouseposition.js"></script>
     <script src="inc/dropdown.js"></script>
     <script src="inc/leafletmap.js"></script>
+    <script src="inc/responses.js"></script>
     <script src="inc/d3plot.js"></script>
+
     <script>
 
         // Disable caching of AJAX responses
@@ -53,6 +55,20 @@
         // Keep track of mapping from Graph to Leaflet, and vice versa
         var mappoints = [];
         var graphpoints = [];
+
+        
+        // jQuery does not have querystring methods?
+        function queryFunc() {
+            var results = {};
+            var q = location.search.replace( '?', '' ).split( '&' );
+            for ( var i=0; i<q.length; i++ ) {
+                results[q[i].split('=')[0]] = q[i].split('=')[1];
+            }
+            return(results);            
+        }
+
+        var Q = queryFunc();
+        evid = Q['evid'];        
 
         function loadData(ev) {
             if (solutionsdata && (evid == ev)) { return; }
@@ -89,22 +105,31 @@
     <div id="map" style="width: 700px; height: 400px"></div>
 
     <script type="text/javascript">
-        map = initmap();
-    </script>
-
-<select div='select' onchange="loadData(this.value); loadResponses(this.value)">
-    <option value="test">Select event</option>
-    <script>
         function dirToOptions(data) {
             $(data).find('a').attr('href',function(i,val) {
                 if (val.match(/\.(geojson)$/)) {
                     var myid = val.split('.')[1];
                     if (val.match(/aggregated/)) { return; } 
                     var text = '<option value="'+myid+'">'+myid+'</option>';
+                    if (myid == evid) {
+                        text = '<option selected value="'+myid+'">'+myid+'</option>';
+                    }
                     $('select').append(text);
                 }
             });
         }
+        function changePage(evid) {
+            window.location.href = window.location.pathname
+                + "?" + $.param({'evid':evid});
+        }
+
+        map = initmap();
+    </script>
+
+<div class='evidSelector'>
+    <select onchange="changePage(this.value)">
+        <option value="test">Select event</option>
+<script>
 
 // This actually loads the directory. You might need to configure
 // your http server to accept this. 
@@ -115,8 +140,9 @@
                 success: function (d){ dirToOptions(d);}
             });
         });
-    </script>
-</select>
+</script>
+    </select>
+</div>
 
 Select grid color mapping:  
 <button onClick="switchGrid('resid')">Residuals</button>
@@ -125,7 +151,7 @@ Select grid color mapping:
 <div id="graph"></div>
 
    <script>
-        evid = 'ci15296281';
+        if (!evid) { evid = 'ci15296281'; }
         loadData(evid);        
         loadResponses(evid);
   </script>
