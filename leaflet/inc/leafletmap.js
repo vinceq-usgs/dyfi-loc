@@ -45,6 +45,15 @@ var solutionMarkerOption = {
     fillOpacity : 1.0,
 };
 
+var solutionMarkerOptionHidden = {
+    radius : 1,
+    color : 'black',
+    weight : 0,
+    fillColor : 'blue',                        
+    fillOpacity : 0.0,
+};
+
+
 var gridMarkerOption = {
     radius : 3,
     color : 'black',
@@ -168,7 +177,36 @@ var solpathOption = {
             }).addTo(map);
             console.log('Finished plotting ' + evid + '.');
             var mapLayers = L.layerGroup([solutionLayer,lineLayer]);
+
             return mapLayers;
+        }
+
+        function checkSolutions(tnew) {
+            // tnow doesn't change until after on('change') eventhandler
+            // so it should be safe to use this right now
+            var t0 = tnow;
+            if (tnew == tnow) { return; }
+            mappoints.forEach(function(pt) {
+                var t = pt.feature.properties.t;
+                
+                if ((t0 < t) & (tnew >= t)) { 
+                    solutionSwitch('on',pt);
+                    return;
+                }
+                if ((t0 >= t) & (tnew < t)) {
+                    solutionSwitch('off',pt);
+                    return;
+                }
+            });
+        }
+
+        function solutionSwitch(on,pt) {
+            if (on == 'on') { 
+                pt.setStyle(solutionMarkerOption); pt.bringToFront(); return;
+            }
+            if (on == 'off') {
+                pt.setStyle(solutionMarkerOptionHidden); return;
+            }
         }
 
         function mouseOver(e) {
@@ -420,10 +458,5 @@ function sortedhash(v,obj) {
     console.log('WARNING: Out of bounds value ' + v);
     var key = obj.sortedkeys[obj.length - 1];
     return obj[key];
-}
-function drawGraphLine(e) {
-//    console.log(e);
-    var t = e.target.time;
-    drawPlotTimeline(t);
 }
 

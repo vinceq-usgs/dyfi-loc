@@ -48,7 +48,7 @@ function drawResponses() {
             return { start:e.properties.t, end:tlast };
         },
         pointToLayer: function(e,latlon) {
-            var cdi = parseInt(e.properties.user_cdi);
+            var cdi = parseInt(e.properties.cdi);
 
             var options = [];
             for (var prop in responseMarkerOption) {
@@ -64,7 +64,10 @@ function drawResponses() {
     timeControl.addTimelines(responsesLayer);
     responsesLayer.addTo(map).bringToBack();
     responsesLayer.on('change',function(e) {
-        drawPlotTimeline(e.target.time);
+        var t = e.target.time;
+        checkSolutions(t);
+        drawPlotTimeline(t);
+        tnow = t;
     });
     timeControl.setTime(tlast);
     if (layercontrolLayer) {

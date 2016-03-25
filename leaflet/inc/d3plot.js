@@ -5,10 +5,8 @@
         var margin = 50,
             width = 700,
             height = 250;
-        var tnow;
         var lineFunc;
         var linePlot;
-        var t0 = 1;
         var tlast = 1200;
 
         function drawGraph() {
@@ -190,5 +188,4 @@
         if (t == tnow) { return t; }
         if (typeof(lineFunc) == 'undefined') { return; }
         lineFunc(t);
-        tnow = t;
     }
