@@ -28,8 +28,8 @@ svg {
 .resid {
     stroke:black;
     stroke-width:0.5px;
-    fill:RoyalBlue;
-    opacity:0.6;
+    fill:Blue;
+    opacity:1.0;
     r:5;
 }
 circle:hover {

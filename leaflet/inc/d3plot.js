@@ -5,6 +5,9 @@
         var margin = 50,
             width = 700,
             height = 250;
+        var tnow;
+        var lineFunc;
+        var linePlot;
 
         function drawGraph() {
 
@@ -133,8 +136,23 @@
                 .attr('height',epicenter_size)
                 .on('mouseover',mouseOverGraph);
 
+            linePlot = undefined;
+            lineFunc = function(t) {
+                var line_t = d3.svg.line()
+                    .x(function(d){return x_scale(t)})
+                    .y(function(d){return y_scale3(d)});
 
-            console.log('Now done with drawGraph.');
+                if (typeof(linePlot) == 'undefined') {
+                    linePlot = svg.append('path')
+                        .attr('d',line_t([3,7]))
+                        .attr('id','linePlot')
+                        .attr('class','path mag');
+                } else {
+                    linePlot.attr('d',line_t([3,7]));
+                }
+            }
+            console.log('Moving lineFunc to 1.');
+            drawPlotTimeline(1);
         }
 
     function mouseOverGraph(e) {
@@ -166,4 +184,11 @@
         var selection = svg.select('#graph_resid_'+e);
         selection.style({'stroke':'red','stroke-width':3}).attr('r',8);
         selected = selection;
+    }
+
+    function drawPlotTimeline(t) {
+        if (t == tnow) { return t; }
+        if (typeof(lineFunc) == 'undefined') { return; }
+        lineFunc(t);
+        tnow = t;
     }

@@ -69,7 +69,7 @@ var solpathOption = {
     color:'blue',
     weight:2,
     opacity:0.5,
-    dashArray:'10,10',
+    dashArray:'5,5',
 }
 
 // Javascript functions in this section
@@ -407,6 +407,7 @@ function drawResponses() {
 
     if (responsesLayer) {
         map.removeLayer(responsesLayer);
+        responsesLayer.clearAllEventListeners();
     }
 
     if (timeControl) {
@@ -432,6 +433,9 @@ function drawResponses() {
     timeControl.addTo(map);
     timeControl.addTimelines(responsesLayer);
     responsesLayer.addTo(map).bringToBack();
+    responsesLayer.on('change',function(e) {
+        drawPlotTimeline(e.target.time);
+    });
 
     if (layercontrolLayer) {
         layercontrolLayer.addOverlay(responsesLayer,'Geocoded responses');
@@ -465,5 +469,9 @@ function hash(v,obj) {
     var key = obj.sortedkeys[obj.length - 1];
     return obj[key];
 }
-
+function drawGraphLine(e) {
+//    console.log(e);
+    var t = e.target.time;
+    drawPlotTimeline(t);
+}
 
