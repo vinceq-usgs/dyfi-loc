@@ -74,6 +74,13 @@ var solpathOption = {
     dashArray:'1,5',
 }
 
+var solpathOptionHidden = {
+    weight:0,
+    opacity:0.0,
+    dashArray:'',
+}
+
+
 // Done with graphics definitions
 
         var solutionLayer;
@@ -104,7 +111,7 @@ var solpathOption = {
         function drawMap() {
             data = solutionsdata;
             solutionsArray = [];
-            lineArray = [];
+            pathsArray = [];
 
             if (gridLayer) { removeGridLayer(); }
 
@@ -112,42 +119,48 @@ var solpathOption = {
             for (i=0; i<data.features.length; i++) {
                 solution = data.features[i];
                 p = solution.properties;
-                var popuptext;
                 var ptLayer;
+                var prevpt;
                 isEpicenter = solution.properties.is_epicenter;
                 if (isEpicenter) {
                     epicenterpt = solution;
                     ptLayer = L.geoJson(solution, {
                         pointToLayer: function(f,latlon) {
-                            m = L.marker(latlon, {
+                            var m = L.marker(latlon, {
                                 icon:epicenterIcon,
                             });
                             m.on('mouseover',mouseOver);
                             return m;
                         }
                     });
+                    solutionsArray.push(ptLayer);
+
                 }
                 else {
                     ptLayer = L.geoJson(solution, {
                         pointToLayer: function(f,latlon) {
-                            m = L.circleMarker(latlon, solutionMarkerOption);
+                            var m = L.circleMarker(latlon, solutionMarkerOption);
                             m.on('mouseover',mouseOver);
                             m.on('click',clickSolution);
                             mappoints[p.t] = m;
                             return m;
                         },
                     });                                                    
+                    solutionsArray.push(ptLayer);
 
-                    // Also store this for intra-solution path
-                    // Reverse this since geojson format is (lon,lat)
-                    // and leaflet format is (lat,lon)
-                    coords = solution.geometry.coordinates.slice().reverse();
-                    lineArray.push(coords);
+                    // Create intra-solution path
+                    
+                    var coords = solution.geometry.coordinates;
+                    var newpt = new L.latLng(coords[1],coords[0]);
+                    if (prevpt) {
+                        var line = [newpt,prevpt];
+                        var m = L.polyline(line,solpathOption);
+                        pathsArray.push(m);
+                        mappaths[p.t] = m;
+                    }
+                    prevpt = newpt;
                 }          
-
-                // Add to solutions layer
-                // Note epicenter is part of solutions layer
-                solutionsArray.push(ptLayer);
+                
             }
 
             // Now plot solution paths
@@ -155,8 +168,8 @@ var solpathOption = {
             if (lineLayer) {
                 map.removeLayer(lineLayer);
             } 
-            lineLayer = L.polyline(lineArray,solpathOption).addTo(map);
-
+            lineLayer = L.featureGroup(pathsArray).addTo(map);
+  
             // Now plot solutions on top of path
 
             if (solutionLayer) {
@@ -165,6 +178,7 @@ var solpathOption = {
             solutionLayer = L.featureGroup(solutionsArray);
             solutionLayer.addTo(map);
             map.fitBounds(solutionLayer.getBounds());
+
  
             // Add control checkboxes 
 
@@ -190,22 +204,26 @@ var solpathOption = {
                 var t = pt.feature.properties.t;
                 
                 if ((t0 < t) & (tnew >= t)) { 
-                    solutionSwitch('on',pt);
+                    solutionSwitch('on',t);
                     return;
                 }
                 if ((t0 >= t) & (tnew < t)) {
-                    solutionSwitch('off',pt);
+                    solutionSwitch('off',t);
                     return;
                 }
             });
         }
 
-        function solutionSwitch(on,pt) {
+        function solutionSwitch(on,t) {
+            var pt = mappoints[t];
+            var path = mappaths[t];
             if (on == 'on') { 
-                pt.setStyle(solutionMarkerOption); pt.bringToFront(); return;
+                pt.setStyle(solutionMarkerOption);
+                if(path) { path.setStyle(solpathOption); }
             }
-            if (on == 'off') {
-                pt.setStyle(solutionMarkerOptionHidden); return;
+            else if (on == 'off') {
+                pt.setStyle(solutionMarkerOptionHidden);
+                if(path) { path.setStyle(solpathOptionHidden); }
             }
         }
 

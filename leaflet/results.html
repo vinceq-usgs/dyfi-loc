@@ -54,9 +54,9 @@
         var timeControl;
 
         // Keep track of mapping from Graph to Leaflet, and vice versa
-        var mappoints = [];
-        var graphpoints = [];
-
+        var mappoints = {};
+        var graphpoints = {};
+        var mappaths = {};
         
         // jQuery does not have querystring methods?
         function queryFunc() {
@@ -110,7 +110,7 @@
             $(data).find('a').attr('href',function(i,val) {
                 if (val.match(/\.(geojson)$/)) {
                     var myid = val.split('.')[1];
-                    if (val.match(/aggregated/)) { return; } 
+                    if (!val.match(/out/)) { return; } 
                     var text = '<option value="'+myid+'">'+myid+'</option>';
                     if (myid == evid) {
                         text = '<option selected value="'+myid+'">'+myid+'</option>';
