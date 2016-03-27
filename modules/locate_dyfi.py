@@ -84,7 +84,7 @@ def locate(obs):
                 bestloc = loc
 
     # Now we have min(residuals) == rms0[MI-Mi]
-    # Calculate rmsMi = rms[Mi] = rms[MI-Mi] - rms0 for each trial epicenter
+    # Calculate rmsMI = rms[MI] = rms[MI-Mi] - rms0 for each trial epicenter
     for trialloc in saveresults:
         p = trialloc['properties']
         p['rmsMi'] = p['resid'] - bestresid
@@ -112,8 +112,10 @@ def getStartingPt(pts):
     for pt in pts:
         cdi = pt['properties']['cdi']
         if cdi > maxcdi:
-            cdi = maxcdi
+            maxcdi = cdi
             bestpt = pt
+            print('Best starting cdi: ' + str(cdi))
+            print(bestpt['properties'])
             
     return bestpt
 
@@ -192,17 +194,21 @@ def trylocation_B(trialloc,obs):
     # for each observation
 
     totalmag = 0
+    totalwt = 0
     for ob in obs:
         # Todo: Implement this as Point object property            
         ii = ob['properties']['cdi']
         dist = ob['properties']['_dist']
+
         trymag = ipe(ii,dist,True)
         ob['properties']['_mag'] = trymag        
-        totalmag += trymag
+        nresp = ob['properties']['nresp']
+        totalmag += trymag*nresp
+        totalwt +=  nresp
 
     # Calculate the mean of M derived from observations
     # This is the M assigned to that trial epicenter
-    meanmag = totalmag/len(obs)
+    meanmag = totalmag/totalwt
 
 
     # Residual === rms[ MI - Mi ] 
