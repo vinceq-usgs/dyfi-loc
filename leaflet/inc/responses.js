@@ -1,6 +1,6 @@
 
 var responseMarkerOption = {
-    radius : 3,
+    radius : 2,
     weight : 1,
     color : 'black',
     fillColor : 'green',
@@ -56,7 +56,6 @@ function drawResponses() {
             }
 //            console.log('Got ' + cdi + ' ' + colorsCdi[cdi]);
             options['fillColor'] = colorsCdi[cdi];
-//            if (cdi <5) { options['fillOpacity'] = 0; options['stroke'] = 0; }
             return L.circleMarker(latlon,options);
         },
     });

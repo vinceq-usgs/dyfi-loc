@@ -19,15 +19,15 @@ var gridColorsDiffMag = {
 };
 
 var gridColorsResid = {
-    '3.5' : '#800026',
-    '3.0' : '#E31A1C' ,
-    '2.5' : '#FC4E2A' ,
-    '2.0' : '#FD8D3C' ,
-    '1.5' : '#FEB24C' ,
-    '1.0' : '#FED976' ,
-    '0.5' : '#FFEDA0' ,
-    '0.0' : 'white',
-    title : 'Resid',
+//    '3.5' : '#800026',
+//    '0.0' : 'white',
+//    '0.012' : '#FFEDA0' ,
+    '0.060' : 'white' ,
+    '0.047' : '#FEB24C' ,
+    '0.019' : '#FD8D3C' ,
+    '0.012' : '#FC4E2A' ,
+    '0.0' : '#E31A1C' ,
+    title : 'rms[MI]',
 };
 
 var gridColors = gridColorsResid;
@@ -439,11 +439,18 @@ var solpathOptionHidden = {
     }
 
     function setGridMarkerStyle(f) {
-        var v = (gridColors === gridColorsResid) ? v = f.properties.resid
+        var v = (gridColors === gridColorsResid) ? v = f.properties.rmsMI
             : (f.properties.mag - gridparentpt.properties.mag);
         var color = sortedhash(v,gridColors);
-
-        options = {};
+        var options = {};
+        if (color == 'white') {
+            options = {
+                radius : 0,
+                weight : 0,
+                fillOpacity : 0,
+            };
+            return options;
+        }
         for (var prop in gridMarkerOption) {
             options[prop] = gridMarkerOption[prop];
         }
