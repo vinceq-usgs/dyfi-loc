@@ -33,17 +33,17 @@ xgridrange = range(-200,210,10)          # search grid in km
 ygridrange = range(-200,210,10)          # search grid in km
 magrange = [ x*0.1 for x in range(18,71) ]   # search parameters for magnitude
 
-def locate(pts):
+def locate(obs):
     """
     Iterate over observations to determine best location
     Returns GeoJSON Feature: epicenter with mag, resid
     
     Arguments:    
-    pts: geojson feature collection (list of GeoJSON points)
+    obs: geojson feature collection (list of GeoJSON points)
     """
 
     counter = 0
-    initloc = getStartingPt(pts)
+    initloc = getStartingPt(obs)
     bestresid = 9999
     bestloc = initloc
     saveresults = []
@@ -56,28 +56,46 @@ def locate(pts):
     for ix in xgridrange:
         for iy in ygridrange:
             counter += 1
+            p = bestloc['properties']
             if counter % 100 == 0:
                 print('%i: Best loc: (%i,%i)' % 
-                    (counter,bestloc['properties']['ix'],
-                     bestloc['properties']['iy'])
-                 )
+                    (counter,p['ix'],p['iy']))
 
             tryloc = getOffsetPt(initloc,ix,iy)
-            result = trylocation(tryloc,pts)
+
+            # Calculate distances and weights only once per trial epicenter
+            getDistancesWts(tryloc,obs)
             
-            mag = result['mag']
+            # Now calculate the magnitude and residual for this trial
+            # epicenter by iterating through each observation
+            result = trylocation(tryloc,obs)
             resid = result['resid']
-            props = {'mag' : mag,'resid' : resid, 'ix': ix, 'iy' : iy }
+            props = {
+                'mag' : result['mag'],
+                'resid' : resid, 
+                'ix': ix, 'iy' : iy 
+            }
             loc = Feature(geometry=tryloc,properties=props)
             saveresults.append(loc)
+
+            # Keep track of the best trial epicenter
             if (resid < bestresid):
                 bestresid = resid
                 bestloc = loc
 
+    # Now we have min(residuals) == rms0[MI-Mi]
+    # Calculate rmsMi = rms[Mi] = rms[MI-Mi] - rms0 for each trial epicenter
+    for trialloc in saveresults:
+        p = trialloc['properties']
+        p['rmsMi'] = p['resid'] - bestresid
+
+    # Save the trial grid for this set of observations
     tmpfilename = 'tmp/solutiongrid.geojson'
     allgeojson = { 'type' : 'FeatureCollection', 'features' : saveresults }
     with open(tmpfilename,'w') as outfile:
         json.dump(allgeojson,outfile)
+
+    # Return the best trial epicenter
     return bestloc
                 
 def getStartingPt(pts):
@@ -92,7 +110,7 @@ def getStartingPt(pts):
     maxcdi = 0.0
     bestpt = 0
     for pt in pts:
-        cdi = pt['properties']['user_cdi']
+        cdi = pt['properties']['cdi']
         if cdi > maxcdi:
             cdi = maxcdi
             bestpt = pt
@@ -133,24 +151,19 @@ def trylocation_A(loc,pts):
     
     bestresid2 = 9999       # Best squared resid so far
     bestmag = 0             # Best mag so far
-    firstrun = True
+
     for trymag in magrange:    
-        # If this is the first run, recalculate distances and weights
-        if firstrun:
-            getDistancesWts(pts,loc)
-            firstrun = False
-            
         # Now iterate through each point and add up the resids
         totalresid2 = 0     # Cumulative total of squared resids
         totalwt2 = 0        # Cumulative total of squared weights
         for pt in pts:
             # Todo: Implement this as Point object property            
-            ii = pt['properties']['user_cdi']
+            ii = pt['properties']['cdi']
             dist = pt['properties']['_dist']
             tryii = ipe(trymag,dist,False)
             
             wt = pt['properties']['_wt']
-            totalresid2 += (wt*(ii - tryii))**2
+            totalresid2 += wt*(ii - tryii)**2
             totalwt2 += wt**2
 
         totalresid2 /= totalwt2
@@ -162,7 +175,7 @@ def trylocation_A(loc,pts):
     results = { 'mag': bestmag, 'resid' : resid }
     return results
  
-def trylocation_B(loc,pts):
+def trylocation_B(trialloc,obs):
     """
     This implements BW1997 calculating residuals of magnitude
     Given a trial epicenter, calculate best magnitude and residual
@@ -170,44 +183,51 @@ def trylocation_B(loc,pts):
     returns [ 'mag' : best magnitude, 'resid' : lowest residual ]
         
     Arguments:
-    pts    GeoJSON feature collection (list of GeoJSON points)
-    loc    GeoJSON point (dict)
+    trialloc    GeoJSON point (dict)
+    obs         GeoJSON feature collection (list of GeoJSON points)
     """
     
-    getDistancesWts(pts,loc)
-
-    totalmag = 0
-    totalresid2 = 0     # Cumulative total of squared resids
-    totalwt = 0
-    totalwt2 = 0        # Cumulative total of squared weights
 
     # First iterate through each point and calculate the estimated mag
     # for each observation
-    for pt in pts:
-        # Todo: Implement this as Point object property            
-        ii = pt['properties']['user_cdi']
-        dist = pt['properties']['_dist']
-        trymag = ipe(ii,dist,True)
 
-        wt = pt['properties']['_wt']
-        pt['properties']['_mag'] = trymag        
-        totalmag += wt*trymag
-        totalwt += wt
+    totalmag = 0
+    for ob in obs:
+        # Todo: Implement this as Point object property            
+        ii = ob['properties']['cdi']
+        dist = ob['properties']['_dist']
+        trymag = ipe(ii,dist,True)
+        ob['properties']['_mag'] = trymag        
+        totalmag += trymag
+
+    # Calculate the mean of M derived from observations
+    # This is the M assigned to that trial epicenter
+    meanmag = totalmag/len(obs)
+
+
+    # Residual === rms[ MI - Mi ] 
+    #   = sqrt( sum( (wt*(MI-Mi))**2 ) / sum(wt**2) )
+    #   where   Mi = M derived from the ith observation
+    #           MI = mean(Mi)
+    # This quantifies how well this trial magnitude fits
+    # the observations (weighted by distance of the obs)
+
+    totalresid2 = 0
+    totalwt2 = 0
+    for ob in obs:
+        wt = ob['properties']['_wt']
+        thismag = ob['properties']['_mag']
+        totalresid2 += (wt * (thismag - meanmag))**2
         totalwt2 += wt**2
 
-    meanmag = totalmag/totalwt
-    # Now calculate the magnitude residual
-    for pt in pts:
-        wt = pt['properties']['_wt']
-        mag = pt['properties']['_mag']
-        resid2 = wt * (meanmag - mag)**2
-        totalresid2 += resid2
-    
     resid = math.sqrt(totalresid2 / totalwt2)
-    results = { 'mag': round(meanmag,1), 'resid' : round(resid,PRECISION) }
+    results = { 
+        'mag': round(meanmag,1), 
+        'resid' : round(resid,PRECISION) 
+    }
     return results
        
-def getDistancesWts(pts,loc):
+def getDistancesWts(trialloc,pts):
     """
     Iterate through all observations and calculate distance to loc
     Also calculates distance-based weight (see BW1997)
@@ -215,18 +235,19 @@ def getDistancesWts(pts,loc):
     Weight is modified by nresp (when event entries are geocoded)
     
     Arguments:
-    pts    geojson feature collection (list of GeoJSON points)
-    loc    geojson point (dict)
+    trialloc    geojson point (dict)
+    pts         geojson feature collection (list of GeoJSON points)
     """
     
     counter = 0    
-    lat0 = loc['coordinates'][1]
-    lon0 = loc['coordinates'][0]
+    lat0 = trialloc['coordinates'][1]
+    lon0 = trialloc['coordinates'][0]
     
     for pt in pts:
         lat1 = pt['geometry']['coordinates'][1]
         lon1 = pt['geometry']['coordinates'][0]
         dist = great_circle((lat0,lon0),(lat1,lon1)).kilometers
+        
         if dist >= 150:
             wt = 0.1
         else:

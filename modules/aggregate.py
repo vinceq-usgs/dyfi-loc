@@ -35,7 +35,6 @@ def aggregate(pts,resolution):
     resolutionMeters = resolution * 1000
     npts = len(pts)
     print('Got ' + str(npts) + ' points this iteration.')
-    print('Calculating UTM coordinates:')
     for pt in pts:
         loc = getAggregation(pt,resolutionMeters)
         if not loc: continue
@@ -59,7 +58,6 @@ def aggregate(pts,resolution):
     results = []
     for loc,pts in rawresults.items():
 
-        print('Calculating CDI for ' + loc + ' (' + str(len(pts)) + ' pts)')
         intensity = cdi.calculate(pts)
         # geom = getBoundingPolygon(loc,resolutionMeters)        
         coords = getCoords(loc,resolutionMeters)
