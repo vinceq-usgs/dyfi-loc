@@ -29,8 +29,8 @@ RESID_TYPE = 'B'
 # TODO: Make these parameters configurable
 
 PRECISION = 4
-xgridrange = range(-200,210,10)          # search grid in km
-ygridrange = range(-200,210,10)          # search grid in km
+xgridrange = range(-100,100,5)          # search grid in km
+ygridrange = range(-100,100,5)          # search grid in km
 magrange = [ x*0.1 for x in range(18,71) ]   # search parameters for magnitude
 
 def locate(obs):
@@ -87,7 +87,7 @@ def locate(obs):
     # Calculate rmsMI = rms[MI] = rms[MI-Mi] - rms0 for each trial epicenter
     for trialloc in saveresults:
         p = trialloc['properties']
-        p['rmsMi'] = p['resid'] - bestresid
+        p['rmsMI'] = p['resid'] - bestresid
 
     # Save the trial grid for this set of observations
     tmpfilename = 'tmp/solutiongrid.geojson'
@@ -202,9 +202,9 @@ def trylocation_B(trialloc,obs):
 
         trymag = ipe(ii,dist,True)
         ob['properties']['_mag'] = trymag        
-        nresp = ob['properties']['nresp']
-        totalmag += trymag*nresp
-        totalwt +=  nresp
+        #nresp = ob['properties']['nresp']
+        totalmag += trymag
+        totalwt +=  1
 
     # Calculate the mean of M derived from observations
     # This is the M assigned to that trial epicenter
@@ -259,10 +259,10 @@ def getDistancesWts(trialloc,pts):
         else:
             wt = 0.1 + math.cos(math.pi/2*dist/150)
 
-        try:
-            nresp = pt['properties']['nresp']
-            if nresp > 0: wt *= nresp
-        except KeyError: pass
+#        try:
+#            nresp = pt['properties']['nresp']
+#            if nresp > 0: wt *= nresp
+#        except KeyError: pass
 
         dist = round(dist,PRECISION)
         wt = round(wt,PRECISION)
