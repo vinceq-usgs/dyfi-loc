@@ -1,5 +1,5 @@
 # dyfi-loc
-DYFI locator. Given a batch of DYFI entries (point intensities), determine the earthquake origin. 
+* Prototype * DYFI locator. Given a batch of DYFI entries (point intensities), determine the earthquake origin. 
 
 The goal is to provide a solution (magnitude, location, time, uncertainty?) as a dyfi-loc product to PDL. This will be used by Hydra to help trigger smaller felt-but-underinstrumented events. Paul also discussed receiving TED location (which should always happen first) as the seed for starting this procedure and initial location.
 
