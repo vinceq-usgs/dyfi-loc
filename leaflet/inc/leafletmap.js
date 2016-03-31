@@ -9,7 +9,7 @@ var gridColorsDiffMag = {
     1.0 : '#FEB24C' ,
     0.66 : '#FED976' ,
     0.33 : '#FFEDA0' ,
-    '-0.1' : 'white',
+    '-0.1' : '#ffffff',
     '-0.2' : '#d0d1e6' ,
     '-0.4' : '#74a9cf' ,
     '-0.6' : '#0570b0' ,
@@ -21,13 +21,12 @@ var gridColorsDiffMag = {
 var gridColorsResid = {
 //    '3.5' : '#800026',
 //    '0.0' : 'white',
-//    '0.012' : '#FFEDA0' ,
-    '0.060' : 'white' ,
-    '0.047' : '#FEB24C' ,
-    '0.019' : '#FD8D3C' ,
-    '0.012' : '#FC4E2A' ,
-    '0.0' : '#E31A1C' ,
-    title : 'rms[MI]',
+    '0.060' : [ 'white' , '50%' ],
+    '0.047' : [ 'yellow', '67%' ],
+    '0.019' : [ 'orange', '80%' ],
+    '0.012' : [ 'red', '90%' ],
+    '0.0' : [ '#990000', '95%' ],
+    title : 'Confidence',
 };
 
 var gridColors = gridColorsResid;
@@ -397,8 +396,13 @@ var solpathOptionHidden = {
                 for (var i = 0; i <  gridColors.length; i++) {
                     var key = sorted[i];
                     var color = gridColors[key];
+                    var legend = key;
+                   if (jQuery.isArray(color)) {
+                        legend = color[1];
+                        color = color[0];
+                    }
                     div.innerHTML +=
-            '<i style="background:' + color + '"></i> ' + key + '<br>';
+            '<i style="background:' + color + '"></i> ' + legend + '<br>';
                 }
                 return div;
             }
@@ -442,6 +446,7 @@ var solpathOptionHidden = {
         var v = (gridColors === gridColorsResid) ? v = f.properties.rmsMI
             : (f.properties.mag - gridparentpt.properties.mag);
         var color = sortedhash(v,gridColors);
+        if (jQuery.isArray(color)) { color = color[0]; }
         var options = {};
         if (color == 'white') {
             options = {
