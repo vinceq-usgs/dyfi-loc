@@ -59,6 +59,7 @@ def aggregate(pts,resolution):
     for loc,pts in rawresults.items():
 
         intensity = cdi.calculate(pts)
+                        
         # geom = getBoundingPolygon(loc,resolutionMeters)        
         coords = getCoords(loc,resolutionMeters)
         props = {
@@ -94,10 +95,14 @@ def myFloor(x,multiple):
 def myCeil(x,multiple):
     return int(math.ceil(x/multiple) * multiple)
 
-def getAggregation(pt,digit):
+def getAggregation(pt,resolutionMeters):
     geom = pt['geometry']['coordinates']
     lat = geom[1]
     lon = geom[0]
+
+    # Sanity check to throw out bad intensities
+    if lon > -114 or lon < -124.5 : return
+
     try: 
         loc = from_latlon(lat,lon)
     except OutOfRangeError:
@@ -105,8 +110,8 @@ def getAggregation(pt,digit):
     if not loc: return
 
     x,y,zonenum,zoneletter = loc
-    x0 = myFloor(x,digit)
-    y0 = myFloor(y,digit)
+    x0 = myFloor(x,resolutionMeters)
+    y0 = myFloor(y,resolutionMeters)
     loc = '{} {} {} {}'.format(x0,y0,zonenum,zoneletter)
     return loc
     

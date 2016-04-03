@@ -92,17 +92,25 @@ def locate(obs):
 
     # Now we have min(residuals) == rms0[MI-Mi]
     # Calculate rmsMI = rms[MI] = rms[MI-Mi] - rms0 for each trial epicenter
+
     for trialloc in saveresults:
         p = trialloc['properties']
         p['rmsMI'] = p['resid'] - bestresid
 
+    # Now we have the best location, recalculate distances in each
+    # observation (this will get saved later)
+
+    getDistancesWts(bestloc['geometry'],obs)
+
     # Save the trial grid for this set of observations
+
     tmpfilename = 'tmp/solutiongrid.geojson'
     allgeojson = { 'type' : 'FeatureCollection', 'features' : saveresults }
     with open(tmpfilename,'w') as outfile:
         json.dump(allgeojson,outfile)
 
     # Return the best trial epicenter
+
     return bestloc
                 
 def getStartingPt_simple(pts):

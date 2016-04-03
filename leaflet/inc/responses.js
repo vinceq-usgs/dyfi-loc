@@ -56,7 +56,8 @@ function drawResponses() {
             }
 //            console.log('Got ' + cdi + ' ' + colorsCdi[cdi]);
             options['fillColor'] = colorsCdi[cdi];
-            return L.circleMarker(latlon,options);
+            return L.circleMarker(latlon,options)
+                .on('click',clickResponse);
         },
     });
     timeControl.addTo(map);
@@ -75,4 +76,7 @@ function drawResponses() {
     return(responsesLayer);
 }
 
+function clickResponse(e) {
+    console.log(e.target.feature.properties);
+}
 

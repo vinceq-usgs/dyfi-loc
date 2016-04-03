@@ -327,7 +327,7 @@ var solpathOptionHidden = {
         infoControl.update(text);
 
         gridparentpt = pt;
-        var inputname = 'data/grids/' + evid + '/grid.' + t + '.geojson';
+        var inputname = 'data/timedependent/' + evid + '/grid.' + t + '.geojson';
         $.getJSON(inputname,onLoadGrid);
     }
 
