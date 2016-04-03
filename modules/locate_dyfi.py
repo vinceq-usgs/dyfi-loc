@@ -26,6 +26,8 @@ ipe = ipes.aww2014
 # Resid type B = residuals of magnitudes at each observation
 RESID_TYPE = 'B'
 
+STARTING_PT_TYPE = 'mean'
+
 # TODO: Make these parameters configurable
 
 PRECISION = 4
@@ -41,6 +43,11 @@ def locate(obs):
     Arguments:    
     obs: geojson feature collection (list of GeoJSON points)
     """
+
+    if STARTING_PT_TYPE == 'mean':
+        getStartingPt = getStartingPt_mean
+    else:
+        getStartingPt = getStartingPt_simple
 
     counter = 0
     initloc = getStartingPt(obs)
@@ -98,7 +105,7 @@ def locate(obs):
     # Return the best trial epicenter
     return bestloc
                 
-def getStartingPt(pts):
+def getStartingPt_simple(pts):
     """
     Find best location from observations (i.e. highest intensity)
     Returns GeoJSON point
@@ -211,7 +218,7 @@ def trylocation_B(trialloc,obs):
     meanmag = totalmag/totalwt
 
 
-    # Residual === rms[ MI - Mi ] 
+    # Residual at this trial epicenter := rms[ MI - Mi ] 
     #   = sqrt( sum( (wt*(MI-Mi))**2 ) / sum(wt**2) )
     #   where   Mi = M derived from the ith observation
     #           MI = mean(Mi)
@@ -235,10 +242,10 @@ def trylocation_B(trialloc,obs):
        
 def getDistancesWts(trialloc,pts):
     """
-    Iterate through all observations and calculate distance to loc
+    Iterate through all observations and calculate distance to trialloc
     Also calculates distance-based weight (see BW1997)
     Returns number of points calculated
-    Weight is modified by nresp (when event entries are geocoded)
+    Weight is NOT modified by nresp 
     
     Arguments:
     trialloc    geojson point (dict)
@@ -272,3 +279,63 @@ def getDistancesWts(trialloc,pts):
 
     return(counter)
 
+def getStartingPt_mean(pts):
+    """
+    Find best location from observations. This will attempt to find
+    the median centroid of all observations weighted by intensity
+    (higher intensities are more important).
+    
+    NOTE: This will also modify xgridrange and ygridrange values.
+    
+    Returns GeoJSON point
+
+    Arguments:
+    pts: geojson feature collection (list of GeoJSON points)
+    """
+    
+    maxcdi = 0.0
+    startpt = 0
+    for pt in pts:
+        cdi = pt['properties']['cdi']
+        if cdi > maxcdi:
+            maxcdi = cdi
+            bestpt = pt
+
+    print('Now bestpt is:')
+    print(bestpt)
+    startpt = bestpt
+
+    for pt in pts:
+        if pt == startpt: continue
+        bestpt = addpts(bestpt,pt,cdiwt(cdi))
+            
+    # TODO: modify xgridrange, ygridrange by throwing out 10% of
+    # outliers
+    print('Best starting point:')
+    print(bestpt)
+    return bestpt
+
+def cdiwt(cdi):
+    if cdi >= 9: return 1
+    if cdi <= 1: return 0
+    return (cdi - 1)/8
+
+def addpts(pt1,pt2,wt):
+    lat1 = pt1['geometry']['coordinates'][1]
+    lat2 = pt2['geometry']['coordinates'][1]
+    
+    lon1 = pt1['geometry']['coordinates'][0]
+    lon2 = pt2['geometry']['coordinates'][0]
+
+    dist = great_circle((lat1,lon1),(lat2,lon2)).kilometers
+ 
+    newlat = (lat1 * (1-wt/2)) + lat2*wt/2
+    newlon = (lon1 * (1-wt/2)) + lon2*wt/2
+    
+    
+    newpt = Feature(geometry=Point((newlon,newlat)))
+    return newpt
+
+
+
+    

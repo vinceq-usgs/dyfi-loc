@@ -9,6 +9,11 @@ Created on Wed Feb 10 17:51:20 2016
 Given an event, run the locator continuously every T_INTERVAL
 minutes until all locations are used.
 
+This script only iterates through the input response data,
+filtering by entry time at each iteration to simulate a growing
+number of responses. All the heavy lifting of the B&W algorithm
+is in modules/locate_dyfi.py
+
 Input is a GeoJSON FeatureCollection of Point Features (individual
 DYFI observations). Each Point requires two properties:
  
@@ -124,6 +129,17 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     if this_npts <= lastrun_npts + args.ptdiff: continue
 
     this_pts = aggregate.aggregate(this_pts,args.utmspan)
+
+    aggregatedfilename = 'aggregated.' + evid + '.geojson'
+    aggregatedgeojson = { 'type': 'FeatureCollection', 'features' : this_pts }
+
+    print('Writing to ' + aggregatedfilename)
+    with open(aggregatedfilename, 'w') as outfile:
+        geojson.dump(aggregatedgeojson, outfile)
+
+    # Copy aggregated grid to leaflet output
+    webfilename = 'leaflet/data/aggregated.' + evid + '.geojson'
+    copyfile(aggregatedfilename,webfilename)
 
     iterations += 1
     best_result = False
