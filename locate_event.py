@@ -130,16 +130,7 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
 
     this_pts = aggregate.aggregate(this_pts,args.utmspan)
 
-    aggregatedfilename = 'aggregated.' + evid + '.geojson'
-    aggregatedgeojson = { 'type': 'FeatureCollection', 'features' : this_pts }
-
-    print('Writing to ' + aggregatedfilename)
-    with open(aggregatedfilename, 'w') as outfile:
-        geojson.dump(aggregatedgeojson, outfile)
-
-    # Copy aggregated grid to leaflet output
-    webfilename = 'leaflet/data/aggregated.' + evid + '.geojson'
-    copyfile(aggregatedfilename,webfilename)
+    # Now do the actual location
 
     iterations += 1
     best_result = False
@@ -149,26 +140,41 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
 
     # Copy solution grid to leaflet output
 
-    webgriddir = 'leaflet/data/grids/' + evid;
-    os.makedirs(webgriddir,exist_ok=True)
-    webgridfile = webgriddir + '/grid.' + str(t) + '.geojson'
+    webtddir = 'leaflet/data/timedependent/' + evid;
+    os.makedirs(webtddir,exist_ok=True)
+    webgridfile = webtddir + '/grid.' + str(t) + '.geojson'
     copyfile(tmpgridfile,webgridfile)    
+
+
+    # Now this_pts should have additional data (distance, mag, etc.)
+    # from the locate function
+    # Save responses (with results) and copy to leaflet output
+ 
+    responsesfilename = 'output/responses.' + evid + '.geojson'   
+    print('Writing to ' + responsesfilename)
+    responsesgeojson = geojson.FeatureCollection(this_pts)
+    with open(responsesfilename, 'w') as outfile:
+        geojson.dump(responsesgeojson, outfile)
+
+    webfilename = 'leaflet/data/aggregated.' + evid + '.geojson'
+    copyfile(responsesfilename,webfilename)
+    webfilename = webtddir + '/responses.' + str(t) + '.geojson'
+    copyfile(responsesfilename,webfilename)
     
-    # TODO: Use GeoJSON property methods for this
+    # Save this solution in allresults
+
     result['properties']['t'] = t
     result['properties']['npts'] = this_npts
     allresults.append(result)
     print('Result: ',result)
 
-    lastrun_npts = this_npts
-    if args.iterations and iterations >= args.iterations: lastrun_npts = npts
-
     # Create a new copy of allresults so we can append the real epicenter
+
     solutions = copy(allresults)
     solutions.append(evdata)
 
-    # Overwrite the output file at each step. It should be usable even
-    # if processing is interrupted.
+    # Overwrite the solutions output file at each step. It should be 
+    # usable even if processing is interrupted.
 
     allgeojson = { 'type': 'FeatureCollection', 'features' : solutions }
     
@@ -178,6 +184,9 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
 
     webfilename = 'leaflet/data/out.' + evid + '.geojson'
     copyfile(outfilename,webfilename)
+
+    lastrun_npts = this_npts
+    if args.iterations and iterations >= args.iterations: lastrun_npts = npts
         
 print(allresults)
 print('Done.')
