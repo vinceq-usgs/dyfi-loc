@@ -33,6 +33,7 @@ from modules import locate_dyfi
 from modules import aggregate
 
 tmpgridfile = 'tmp/solutiongrid.geojson'
+tmpipefile = 'tmp/ipeline.json'
 
 # INITIAL SETUP
 
@@ -138,12 +139,14 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
         (iterations,t/60,this_npts,len(this_pts)))
     result = locate_dyfi.locate(this_pts)
 
-    # Copy solution grid to leaflet output
+    # Copy solution grid and ipe line to leaflet output
 
     webtddir = 'leaflet/data/timedependent/' + evid;
     os.makedirs(webtddir,exist_ok=True)
     webgridfile = webtddir + '/grid.' + str(t) + '.geojson'
     copyfile(tmpgridfile,webgridfile)    
+    webgridfile = webtddir + '/ipeline.' + str(t) + '.geojson'
+    copyfile(tmpipefile,webgridfile)    
 
 
     # Now this_pts should have additional data (distance, mag, etc.)
