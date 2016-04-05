@@ -32,6 +32,12 @@ svg {
     opacity:1.0;
     r:5;
 }
+.responses {
+    stroke-width:0;
+    fill:Green;
+    opacity:1.0;
+    r:2;
+}
 circle:hover {
     stroke-width:3.0px;
     stroke:red;
