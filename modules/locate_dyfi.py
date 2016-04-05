@@ -26,7 +26,7 @@ ipe = ipes.aww2014
 # Resid type B = residuals of magnitudes at each observation
 RESID_TYPE = 'B'
 
-STARTING_PT_TYPE = 'mean'
+STARTING_PT_TYPE = 'simple'
 
 # TODO: Make these parameters configurable
 
@@ -34,6 +34,7 @@ PRECISION = 4
 xgridrange = range(-100,100,5)          # search grid in km
 ygridrange = range(-100,100,5)          # search grid in km
 magrange = [ x*0.1 for x in range(18,71) ]   # search parameters for magnitude
+ipedists = [ x*0.1 for x in range(1,100)] + list(range(10,100)) + list(range(100,310,10))
 
 def locate(obs):
     """
@@ -97,17 +98,23 @@ def locate(obs):
         p = trialloc['properties']
         p['rmsMI'] = p['resid'] - bestresid
 
-    # Now we have the best location, recalculate distances in each
-    # observation (this will get saved later)
+    # Now we have the best location.
+    # Recalculate distances in each observation (this will get saved later)
+    # And get a line of points for plotting
 
     getDistancesWts(bestloc['geometry'],obs)
-
-    # Save the trial grid for this set of observations
+    bestmag = bestloc['properties']['mag']
+    ipeline = getipeline(bestmag,ipedists)
+    # Save the trial grid and ipe for this set of observations
 
     tmpfilename = 'tmp/solutiongrid.geojson'
     allgeojson = { 'type' : 'FeatureCollection', 'features' : saveresults }
     with open(tmpfilename,'w') as outfile:
         json.dump(allgeojson,outfile)
+
+    tmpfilename = 'tmp/ipeline.json'
+    with open(tmpfilename,'w') as outfile:
+        json.dump(ipeline,outfile)
 
     # Return the best trial epicenter
 
@@ -273,7 +280,6 @@ def getDistancesWts(trialloc,pts):
             wt = 0.1
         else:
             wt = 0.1 + math.cos(math.pi/2*dist/150)
-
 #        try:
 #            nresp = pt['properties']['nresp']
 #            if nresp > 0: wt *= nresp
@@ -324,9 +330,9 @@ def getStartingPt_mean(pts):
     return bestpt
 
 def cdiwt(cdi):
-    if cdi >= 9: return 1
-    if cdi <= 1: return 0
-    return (cdi - 1)/8
+#    if cdi >= 9: return 1
+#    if cdi <= 1: return 0
+    return cdi/10
 
 def addpts(pt1,pt2,wt):
     lat1 = pt1['geometry']['coordinates'][1]
@@ -335,15 +341,25 @@ def addpts(pt1,pt2,wt):
     lon1 = pt1['geometry']['coordinates'][0]
     lon2 = pt2['geometry']['coordinates'][0]
 
-    dist = great_circle((lat1,lon1),(lat2,lon2)).kilometers
- 
-    newlat = (lat1 * (1-wt/2)) + lat2*wt/2
-    newlon = (lon1 * (1-wt/2)) + lon2*wt/2
-    
+    newlat = (lat1 * (1-wt)) + lat2*wt
+    newlon = (lon1 * (1-wt)) + lon2*wt
     
     newpt = Feature(geometry=Point((newlon,newlat)))
     return newpt
 
+def getipeline(mag,dists):
+    metadata = {
+        'name' : ipe.name,
+        'mag' : mag
+    }
+    values = []
+    for dist in dists:
+        ii = ipe(mag,dist,False)
+        if ii < 2: continue
+        ii = round(ii,2)
+        values.append({ 'x':dist, 'y':ii})
+    
+    return { 'metadata' : metadata, 'values' : values }
 
 
     

@@ -17,6 +17,8 @@ def aww2014(mag,r,inverse):
     
     If inverse is true, returns mag = f(intensity,r)
     """
+
+    aww2014.name = 'Atkinson, Worden, Wald 2014'
     
     R = math.sqrt(r**2 + 14**2)
     if R > 50:
