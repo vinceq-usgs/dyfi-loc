@@ -5,10 +5,12 @@ var margin = 50,
 
 var x_scale;
 var y_scale;
+var xmin = 5, xmax = 300, ymin = 1, ymax = 10;
 
-function drawGraphDistance(data) {
-    console.log('Now in drawGraphDistance.');
-    console.log(data);
+function drawGraphDistance(t) {
+   var inputname = 'data/timedependent/' + evid + '/responses.' + t + '.geojson';
+    console.log('Now loading ' + inputname);
+    $.getJSON(inputname,onLoadResponses);
 
     if (svg2) {
         svg2.remove();
@@ -19,12 +21,21 @@ function drawGraphDistance(data) {
         .attr("width", width)
         .attr("height", height);
  
+    function onLoadResponses(data) {
+        drawGraphResponses(data);
+        var inputname = 'data/timedependent/' + evid + '/ipeline.' + t + '.geojson';
+        $.getJSON(inputname,drawGraphIpe);
+    }
+}
+
+function drawGraphResponses(data) {
+
     svg2.selectAll('circle.responses')
         .data(data.features).enter()
         .append('circle').attr('class','responses');
 
-    var x_extent = [5,300];
-    var y_extent = [1,9];
+    var x_extent = [xmin,xmax];
+    var y_extent = [ymin,ymax];
 
     x_scale = d3.scale.log().range([margin,width-margin])
         .domain(x_extent);
@@ -51,9 +62,8 @@ function drawGraphDistance(data) {
     svg2.selectAll('circle')
         .attr('cx',function(d){return x_scale(d.properties._dist)})
         .attr('cy',function(d){return y_scale(d.properties.cdi)})
-        .attr('r',5);
-
-
+        .attr('r',5)
+        .on('click',function(d){console.log(d.properties)});
 
 }
 
@@ -63,17 +73,23 @@ function drawGraphIpe(data) {
 
     var line_ipe = d3.svg.line()
         .x(function(d){
-            return (d.x >= 5) ? 
-                x_scale(d.x) : x_scale(5)
+            return (d.x >= xmin) ? 
+                x_scale(d.x) : x_scale(xmin)
         })
         .y(function(d){
-            return (d.x >= 5) ?
-                y_scale(d.y) : y_scale(1)
+            return (d.x >= xmin) ?
+                y_scale(d.y) : y_scale(ymin)
         });
 
     svg2.append('path')
         .attr('d',line_ipe(data.values))
         .attr('class','path mag');
+
+    var name = data.metadata.name, mag = data.metadata.mag;
+    svg2.append('g')
+        .attr('x',(xmax+xmin)/2)
+        .attr('y',ymax)
+        .text(name + 'M' + mag);
 
 }
 

@@ -330,15 +330,7 @@ var solpathOptionHidden = {
         var inputname = 'data/timedependent/' + evid + '/grid.' + t + '.geojson';
         $.getJSON(inputname,onLoadGrid);
 
-        inputname = 'data/timedependent/' + evid + '/responses.' + t + '.geojson';
-        console.log('Now loading ' + inputname);
-        $.getJSON(inputname,onLoadResponses);
-
-        function onLoadResponses(data) {
-            drawGraphDistance(data);
-            inputname = 'data/timedependent/' + evid + '/ipeline.' + t + '.geojson';
-            $.getJSON(inputname,drawGraphIpe);
-        }
+        drawGraphDistance(t);
     }
 
 // Trial grid loading, display, and events
