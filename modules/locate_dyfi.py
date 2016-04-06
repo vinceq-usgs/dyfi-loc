@@ -31,8 +31,8 @@ STARTING_PT_TYPE = 'simple'
 # TODO: Make these parameters configurable
 
 PRECISION = 4
-xgridrange = range(-100,100,5)          # search grid in km
-ygridrange = range(-100,100,5)          # search grid in km
+xgridrange = range(-300,300,20)          # search grid in km
+ygridrange = range(-300,300,20)          # search grid in km
 magrange = [ x*0.1 for x in range(18,71) ]   # search parameters for magnitude
 ipedists = [ x*0.1 for x in range(1,100)] + list(range(10,100)) + list(range(100,310,10))
 

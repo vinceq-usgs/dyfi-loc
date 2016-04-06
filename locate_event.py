@@ -109,36 +109,49 @@ for i in range(0,len(allpts)):
     if 'is_epicenter' in allpts[i]['properties']: break
 
 evdata = allpts.pop(i)
-npts = len(allpts)
-print('Finished loading, got %i pts.' % npts)
+all_npts = len(allpts)
+print('Finished loading, got %i pts.' % all_npts)
+
+solutions = [ evdata ]
 
 # Now loop over each time interval, figure out which subset
 # of observations to run in that interval, and run the locator 
            
-lastrun_npts = 0    # Number of points of last run
-iterations = 0      # Number of iterations of locator algorithm
-t = 0               # Now computing location for first t seconds of event
-allresults=[]
+def main():
 
-while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
-    t += args.interval
+    lastrun_npts = 0    # Number of points of last run
+    iterations = 0      # Number of iterations of locator algorithm
+    t = 0               # Now computing location for first t seconds of event
 
-    # Create a new datapts that only has the entries in the time window
+    while (lastrun_npts < all_npts and (args.maxtime == 0 or t < args.maxtime)):
+        t += args.interval
     
-    this_pts = [ pt for pt in allpts if pt['properties']['t'] <= t ]
-    this_npts = len(this_pts)
-    if this_npts <= lastrun_npts + args.ptdiff: continue
+        # Create a new datapts that only has the entries in the time window
+        
+        this_pts = [ pt for pt in allpts if pt['properties']['t'] <= t ]
+        this_npts = len(this_pts)
+        if this_npts <= lastrun_npts + args.ptdiff: continue
+    
+        iterations += 1
+        print('%i: Running otime + %i mins (%i entries in %i locations)...' %
+            (iterations,t/60,this_npts,len(this_pts)))
+        locateAndSave(this_pts,t)
 
-    this_pts = aggregate.aggregate(this_pts,args.utmspan)
+        lastrun_npts = this_npts
+        if args.iterations and iterations >= args.iterations: break
 
-    # Now do the actual location
+    # Add one more solution with ALL entries
 
-    iterations += 1
-    best_result = False
-    print('%i: Running otime + %i mins (%i entries in %i locations)...' %
-        (iterations,t/60,this_npts,len(this_pts)))
-    result = locate_dyfi.locate(this_pts)
+    locateAndSave(allpts,args.maxtime + args.interval)
+    print(solutions)
+    print('Done.')
 
+
+def locateAndSave(raw_pts,t):
+
+    aggregated_pts = aggregate.aggregate(raw_pts,args.utmspan)
+    result = locate_dyfi.locate(aggregated_pts)
+    
     # Copy solution grid and ipe line to leaflet output
 
     webtddir = 'leaflet/data/timedependent/' + evid;
@@ -148,14 +161,13 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     webgridfile = webtddir + '/ipeline.' + str(t) + '.geojson'
     copyfile(tmpipefile,webgridfile)    
 
-
-    # Now this_pts should have additional data (distance, mag, etc.)
+    # Now aggregated_pts should have additional data (distance, mag, etc.)
     # from the locate function
     # Save responses (with results) and copy to leaflet output
  
     responsesfilename = 'output/responses.' + evid + '.geojson'   
     print('Writing to ' + responsesfilename)
-    responsesgeojson = geojson.FeatureCollection(this_pts)
+    responsesgeojson = geojson.FeatureCollection(aggregated_pts)
     with open(responsesfilename, 'w') as outfile:
         geojson.dump(responsesgeojson, outfile)
 
@@ -164,17 +176,12 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     webfilename = webtddir + '/responses.' + str(t) + '.geojson'
     copyfile(responsesfilename,webfilename)
     
-    # Save this solution in allresults
+    # Save this solution
 
     result['properties']['t'] = t
-    result['properties']['npts'] = this_npts
-    allresults.append(result)
+    result['properties']['npts'] = len(raw_pts)
+    solutions.append(result)
     print('Result: ',result)
-
-    # Create a new copy of allresults so we can append the real epicenter
-
-    solutions = copy(allresults)
-    solutions.append(evdata)
 
     # Overwrite the solutions output file at each step. It should be 
     # usable even if processing is interrupted.
@@ -188,12 +195,9 @@ while (lastrun_npts < npts and (args.maxtime == 0 or t < args.maxtime)):
     webfilename = 'leaflet/data/out.' + evid + '.geojson'
     copyfile(outfilename,webfilename)
 
-    lastrun_npts = this_npts
-    if args.iterations and iterations >= args.iterations: lastrun_npts = npts
-        
-print(allresults)
-print('Done.')
 
 
-        
+# Now execute
+
+main()
 
