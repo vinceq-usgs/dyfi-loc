@@ -17,6 +17,8 @@ Location Viewer Features
 - Use the Event Selector menu in the lower left corner to select an event.
 - Hover mouse pointer over solutions in map or graph to see info.
 - Click on a solution to show the trial grid that produced that solution. Click again to remove from display.
+- Clicking on a solution will also show a new graph of geocoded intensities 
+used in that solution, plotted against distance, and with the IPE used for the location. (Scroll down the page to see it.)
 - Press 'play' on slider bar to see aggregated responses.
 
 Locator Algorithm
