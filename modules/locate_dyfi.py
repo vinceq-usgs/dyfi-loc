@@ -31,10 +31,12 @@ STARTING_PT_TYPE = 'simple'
 # TODO: Make these parameters configurable
 
 PRECISION = 4
-xgridrange = range(-300,300,20)          # search grid in km
-ygridrange = range(-300,300,20)          # search grid in km
 magrange = [ x*0.1 for x in range(18,71) ]   # search parameters for magnitude
-ipedists = [ x*0.1 for x in range(1,100)] + list(range(10,100)) + list(range(100,310,10))
+
+IPEDISTS = [ x*0.1 for x in range(1,100)] + list(range(10,100)) + list(range(100,310,10))
+GRIDSTEP_INIT = 50
+GRIDSTEP_FINAL = 5
+#TRYLOCATIONF = 0
 
 def locate(obs):
     """
@@ -50,17 +52,61 @@ def locate(obs):
     else:
         getStartingPt = getStartingPt_simple
 
-    counter = 0
     initloc = getStartingPt(obs)
-    bestresid = 9999
     bestloc = initloc
     saveresults = []
 
+    global TRYLOCATIONF
     if RESID_TYPE == 'A':
-        trylocation = trylocation_A
+        TRYLOCATIONF = trylocation_A
     else:
-        trylocation = trylocation_B
-    
+        TRYLOCATIONF = trylocation_B
+
+    print(TRYLOCATIONF)
+    initloc = loopGrid(initloc,obs,GRIDSTEP_INIT,saveresults)
+    bestloc = loopGrid(initloc,obs,GRIDSTEP_FINAL,saveresults)
+
+     # Now we have min(residuals) == rms0[MI-Mi]
+    # Calculate rmsMI = rms[MI] = rms[MI-Mi] - rms0 for each trial epicenter
+
+    print(bestloc)
+    bestresid = bestloc['properties']['resid']
+    for trialloc in saveresults:
+        p = trialloc['properties']
+        p['rmsMI'] = p['resid'] - bestresid
+
+    # Now we have the best location.
+    # Recalculate distances in each observation (this will get saved later)
+    # And get a line of points for plotting
+
+    getDistancesWts(bestloc['geometry'],obs)
+    bestmag = bestloc['properties']['mag']
+    ipeline = getipeline(bestmag,IPEDISTS)
+    # Save the trial grid and ipe for this set of observations
+
+    tmpfilename = 'tmp/solutiongrid.geojson'
+    allgeojson = { 'type' : 'FeatureCollection', 'features' : saveresults }
+    with open(tmpfilename,'w') as outfile:
+        json.dump(allgeojson,outfile)
+
+    tmpfilename = 'tmp/ipeline.json'
+    with open(tmpfilename,'w') as outfile:
+        json.dump(ipeline,outfile)
+
+    # Return the best trial epicenter
+
+    return bestloc
+
+def loopGrid(initloc,obs,gridstep,saveresults):
+
+    print(TRYLOCATIONF)
+
+    counter = 0
+    bestloc = initloc
+    bestresid = 9999
+
+    xgridrange = [ x * gridstep for x in range(-10,11) ]
+    ygridrange = [ x * gridstep for x in range(-10,11) ]
     for ix in xgridrange:
         for iy in ygridrange:
             counter += 1
@@ -76,7 +122,7 @@ def locate(obs):
             
             # Now calculate the magnitude and residual for this trial
             # epicenter by iterating through each observation
-            result = trylocation(tryloc,obs)
+            result = TRYLOCATIONF(tryloc,obs)
             resid = result['resid']
             props = {
                 'mag' : result['mag'],
@@ -90,33 +136,6 @@ def locate(obs):
             if (resid < bestresid):
                 bestresid = resid
                 bestloc = loc
-
-    # Now we have min(residuals) == rms0[MI-Mi]
-    # Calculate rmsMI = rms[MI] = rms[MI-Mi] - rms0 for each trial epicenter
-
-    for trialloc in saveresults:
-        p = trialloc['properties']
-        p['rmsMI'] = p['resid'] - bestresid
-
-    # Now we have the best location.
-    # Recalculate distances in each observation (this will get saved later)
-    # And get a line of points for plotting
-
-    getDistancesWts(bestloc['geometry'],obs)
-    bestmag = bestloc['properties']['mag']
-    ipeline = getipeline(bestmag,ipedists)
-    # Save the trial grid and ipe for this set of observations
-
-    tmpfilename = 'tmp/solutiongrid.geojson'
-    allgeojson = { 'type' : 'FeatureCollection', 'features' : saveresults }
-    with open(tmpfilename,'w') as outfile:
-        json.dump(allgeojson,outfile)
-
-    tmpfilename = 'tmp/ipeline.json'
-    with open(tmpfilename,'w') as outfile:
-        json.dump(ipeline,outfile)
-
-    # Return the best trial epicenter
 
     return bestloc
                 
@@ -323,8 +342,6 @@ def getStartingPt_mean(pts):
         if pt == startpt: continue
         bestpt = addpts(bestpt,pt,cdiwt(cdi))
             
-    # TODO: modify xgridrange, ygridrange by throwing out 10% of
-    # outliers
     print('Best starting point:')
     print(bestpt)
     return bestpt

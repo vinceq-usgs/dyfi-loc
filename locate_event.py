@@ -26,7 +26,6 @@ import argparse
 import os.path
 import sys
 import geojson
-from copy import copy
 from shutil import copyfile
 
 from modules import locate_dyfi
