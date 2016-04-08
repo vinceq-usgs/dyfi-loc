@@ -49,6 +49,12 @@ circle:hover {
     opacity:0.6;
     r:3;
 }
+.gridboundary {
+    stroke:blue;
+    stroke-width:3px;
+    fill:none;
+    opacity:0.5;
+}
 path.mag {
     stroke:red;
     fill:none;

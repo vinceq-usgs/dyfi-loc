@@ -69,7 +69,6 @@ function drawGraphResponses(data) {
 
 function drawGraphIpe(data) {
     console.log('In drawGraphIpe');
-    console.log(data);
 
     var line_ipe = d3.svg.line()
         .x(function(d){

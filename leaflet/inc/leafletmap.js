@@ -21,11 +21,11 @@ var gridColorsDiffMag = {
 var gridColorsResid = {
 //    '3.5' : '#800026',
 //    '0.0' : 'white',
-    '0.060' : [ 'white' , '50%' ],
+    '0.060' : [ 'white' , '<50%' ],
     '0.047' : [ 'yellow', '67%' ],
     '0.019' : [ 'orange', '80%' ],
     '0.012' : [ 'red', '90%' ],
-    '0.0' : [ '#990000', '95%' ],
+    '0.0' : [ '#990000', '95%+' ],
     title : 'Confidence',
 };
 
@@ -54,7 +54,7 @@ var solutionMarkerOptionHidden = {
 
 
 var gridMarkerOption = {
-    radius : 3,
+    radius : 2,
     color : 'black',
     weight : 1,
     fillColor : 'white',                        
@@ -369,8 +369,17 @@ var solpathOptionHidden = {
                 },
             });                                                    
             gridpts.push(ptLayer);
+
         }
         gridLayer = L.featureGroup(gridpts).addTo(map);
+
+        if (gridRectangle) {
+            gridRectangle.removeFrom(map);
+        }
+        gridRectangle = L.rectangle(gridLayer.getBounds(),{
+            className: 'gridboundary'
+        });
+        gridRectangle.addTo(map);
 
         // If this is the first gridLayer, reset bounds to fit
 
@@ -426,9 +435,11 @@ var solpathOptionHidden = {
         map.removeLayer(gridLayer);
         
         if (gridLegend) { gridLegend.removeFrom(map); }
+        if (gridRectangle) { map.removeLayer(gridRectangle); }
 
         gridLegend = undefined;
         gridparentpt = undefined;
+        gridRectangle = undefined;
     }
 
     function switchGrid(type) {
