@@ -57,6 +57,8 @@ Test events
 - ci15481673
 - nc71996906
 - nc72282711
+- Additional 46 Northern California and 63 Southern California events with 1000+ responses
+- Additional 132 Oklahoma events with 100+ responses
 
 Time, load statistics and optimization
 -----------------------
