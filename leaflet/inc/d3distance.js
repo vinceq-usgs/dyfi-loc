@@ -59,12 +59,11 @@ function drawGraphResponses(data) {
         .text('Intensity')
         .attr('transform','rotate(-90,-32,0) translate(-180)');
 
-    svg2.selectAll('circle')
+    svg2.selectAll('circle.responses')
         .attr('cx',function(d){return x_scale(d.properties._dist)})
         .attr('cy',function(d){return y_scale(d.properties.cdi)})
         .attr('r',5)
         .on('click',function(d){console.log(d.properties)});
-
 }
 
 function drawGraphIpe(data) {
@@ -85,13 +84,13 @@ function drawGraphIpe(data) {
         .attr('class','path mag');
 
     var name = data.metadata.name, mag = data.metadata.mag;
-    svg2.append('g')
-        .attr('x',(xmax+xmin)/2)
-        .attr('y',ymax)
-        .text(name + 'M' + mag);
-
-}
-
+    svg2.append('text')
+       .attr("text-anchor", "end")  
+        .style("font-size", "12px") 
+        .attr('x',width-margin)
+        .attr('y',margin*1.5)
+        .text(name + ' M' + mag)
+    }
 
     function mouseOverPt(e) {
         mappt = mappoints[e.properties.t];
