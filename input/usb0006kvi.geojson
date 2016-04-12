@@ -1,1 +1,1 @@
-{"features": [{"properties": {"mag": 3.3, "evid": "usb0006kvi", "is_epicenter": 1, "eventdatetime": 1320604016}, "geometry": {"type": "Point", "coordinates": [-96.864, 35.4778]}, "type": "Feature", "id": 0}], "type": "FeatureCollection"}
+{"features": [{"geometry": {"coordinates": [-96.864, 35.4778], "type": "Point"}, "id": 0, "properties": {"evid": "usb0006kvi", "is_epicenter": 1, "eventdatetime": 1320604016, "mag": 3.3}, "type": "Feature"}], "type": "FeatureCollection"}

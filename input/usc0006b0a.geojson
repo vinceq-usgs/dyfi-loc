@@ -1,1 +1,1 @@
-{"features": [{"properties": {"eventdatetime": 1318917087, "mag": 2.9, "is_epicenter": 1, "evid": "usc0006b0a"}, "geometry": {"coordinates": [-97.3373, 35.4498], "type": "Point"}, "id": 0, "type": "Feature"}], "type": "FeatureCollection"}
+{"features": [{"properties": {"eventdatetime": 1318917087, "is_epicenter": 1, "mag": 2.9, "evid": "usc0006b0a"}, "id": 0, "geometry": {"coordinates": [-97.3373, 35.4498], "type": "Point"}, "type": "Feature"}], "type": "FeatureCollection"}
