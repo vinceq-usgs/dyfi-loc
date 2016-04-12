@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"mag": 3.9, "is_epicenter": 1, "eventdatetime": 1320576755, "evid": "usb0006krn"}, "geometry": {"coordinates": [-96.7968, 35.567], "type": "Point"}, "id": 0}]}

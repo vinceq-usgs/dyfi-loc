@@ -1,0 +1,1 @@
+{"features": [{"geometry": {"coordinates": [-97.2149, 35.5661], "type": "Point"}, "properties": {"eventdatetime": 1266039055, "is_epicenter": 1, "evid": "us2010sraq", "mag": 3.2}, "id": 0, "type": "Feature"}], "type": "FeatureCollection"}

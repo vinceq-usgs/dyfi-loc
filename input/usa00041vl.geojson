@@ -1,0 +1,1 @@
+{"features": [{"geometry": {"coordinates": [-97.2243, 35.2253], "type": "Point"}, "properties": {"mag": 2.8, "is_epicenter": 1, "eventdatetime": 1287510795, "evid": "usa00041vl"}, "id": 0, "type": "Feature"}], "type": "FeatureCollection"}
