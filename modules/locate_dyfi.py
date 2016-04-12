@@ -21,12 +21,13 @@ from geopy.distance import great_circle
 
 from modules import ipes
 
-ipe = ipes.aww2014
 # Resid type A = residuals of intensities at each observation
 # Resid type B = residuals of magnitudes at each observation
 RESID_TYPE = 'B'
 
 STARTING_PT_TYPE = 'simple'
+
+FILTERBYLOC = ''
 
 # TODO: Make these parameters configurable
 
@@ -56,15 +57,20 @@ def locate(obs):
     bestloc = initloc
     saveresults = []
 
+    # We need an initial location to figure out which IPE to use.
+    # Also run a sanity check on locations
+
+    ipe = chooseIpe(initloc)
+    obs = filterObs(obs)
+    
     global TRYLOCATIONF
     if RESID_TYPE == 'A':
         TRYLOCATIONF = trylocation_A
     else:
         TRYLOCATIONF = trylocation_B
 
-    print(TRYLOCATIONF)
-    initloc = loopGrid(initloc,obs,GRIDSTEP_INIT,saveresults)
-    bestloc = loopGrid(initloc,obs,GRIDSTEP_FINAL,saveresults)
+    initloc = loopGrid(ipe,initloc,obs,GRIDSTEP_INIT,saveresults)
+    bestloc = loopGrid(ipe,initloc,obs,GRIDSTEP_FINAL,saveresults)
 
      # Now we have min(residuals) == rms0[MI-Mi]
     # Calculate rmsMI = rms[MI] = rms[MI-Mi] - rms0 for each trial epicenter
@@ -75,13 +81,13 @@ def locate(obs):
         p = trialloc['properties']
         p['rmsMI'] = p['resid'] - bestresid
 
-    # Now we have the best location.
     # Recalculate distances in each observation (this will get saved later)
     # And get a line of points for plotting
 
     getDistancesWts(bestloc['geometry'],obs)
     bestmag = bestloc['properties']['mag']
-    ipeline = getipeline(bestmag,IPEDISTS)
+    ipeline = getipeline(ipe,bestmag,IPEDISTS)
+
     # Save the trial grid and ipe for this set of observations
 
     tmpfilename = 'tmp/solutiongrid.geojson'
@@ -97,9 +103,7 @@ def locate(obs):
 
     return bestloc
 
-def loopGrid(initloc,obs,gridstep,saveresults):
-
-    print(TRYLOCATIONF)
+def loopGrid(ipe,initloc,obs,gridstep,saveresults):
 
     counter = 0
     bestloc = initloc
@@ -122,7 +126,7 @@ def loopGrid(initloc,obs,gridstep,saveresults):
             
             # Now calculate the magnitude and residual for this trial
             # epicenter by iterating through each observation
-            result = TRYLOCATIONF(tryloc,obs)
+            result = TRYLOCATIONF(ipe,obs)
             resid = result['resid']
             props = {
                 'mag' : result['mag'],
@@ -180,7 +184,7 @@ def getOffsetPt(initloc,ix,iy):
     result = Point((lon,lat))
     return result
     
-def trylocation_A(loc,pts):
+def trylocation_A(ipe,pts):
     """
     This implements BW1997 but calculating residuals of intensity
     Given a trial epicenter, calculate best magnitude and residual
@@ -218,7 +222,7 @@ def trylocation_A(loc,pts):
     results = { 'mag': bestmag, 'resid' : resid }
     return results
  
-def trylocation_B(trialloc,obs):
+def trylocation_B(ipe,obs):
     """
     This implements BW1997 calculating residuals of magnitude
     Given a trial epicenter, calculate best magnitude and residual
@@ -364,7 +368,7 @@ def addpts(pt1,pt2,wt):
     newpt = Feature(geometry=Point((newlon,newlat)))
     return newpt
 
-def getipeline(mag,dists):
+def getipeline(ipe,mag,dists):
     metadata = {
         'name' : ipe.name,
         'mag' : mag
@@ -378,5 +382,44 @@ def getipeline(mag,dists):
     
     return { 'metadata' : metadata, 'values' : values }
 
+def chooseIpe(loc):
+    global FILTERBYLOC
+    lon = loc['geometry']['coordinates'][0]
+    print('Got lon:' + str(lon))
+    print(loc)
+    if lon < -114: 
+        ipe = ipes.aww2014wna
+        FILTERBYLOC = filterLocWna
+    else:
+        ipe = ipes.aww2014ena
+        FILTERBYLOC = filterLocEna
 
+    print('Using ' + ipe.name)
+    return ipe
+
+def filterLocWna(loc):
+    lat = loc['geometry']['coordinates'][1]
+    lon = loc['geometry']['coordinates'][0]
+    
+    if lat > 42 or lat < 30: return
+    if lon < -124.5 or lon > -112.5: return
+
+    return True
+    
+def filterLocEna(loc):
+    lat = loc['geometry']['coordinates'][1]
+    lon = loc['geometry']['coordinates'][0]
+    
+    if lat > 38 or lat < 32: return
+    if lon < -102 or lon > -93: return
+
+    return True
+    
+def filterObs(obs):
+    newobs = []
+    for ob in obs:        
+        if FILTERBYLOC(ob):
+            newobs.append(ob)
+
+    return newobs
     

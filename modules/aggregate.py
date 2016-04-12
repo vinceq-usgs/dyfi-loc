@@ -100,9 +100,6 @@ def getAggregation(pt,resolutionMeters):
     lat = geom[1]
     lon = geom[0]
 
-    # Sanity check to throw out bad intensities
-    if lon > -114 or lon < -124.5 : return
-
     try: 
         loc = from_latlon(lat,lon)
     except OutOfRangeError:
