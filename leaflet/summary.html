@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DYFI All Events Viewer</title>
+    <meta charset="utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <link rel="stylesheet" type="text/css" href="inc/leaflet.timeline.min.css" />
+    <link rel="stylesheet" type="text/css" href="inc/summarystyles.css">
+
+</head>
+
+<body>
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+    <script src="http://calvinmetcalf.github.io/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="inc/leaflet.timeline.js"></script>
+
+    <script src="inc/dropdown.js"></script>
+    <script src="inc/responses.js"></script>
+    <script src="inc/d3magdist.js"></script>
+    <script src="inc/d3magdiff.js"></script>
+
+    <script>
+        //Global variables
+        var alldata;
+
+        // Disable caching of AJAX responses
+        $.ajaxSetup ({
+            cache: false
+        });
+
+        // Global variables
+        // jQuery does not have querystring methods?
+        function queryFunc() {
+            var results = {};
+            var q = location.search.replace( '?', '' ).split( '&' );
+            for ( var i=0; i<q.length; i++ ) {
+                results[q[i].split('=')[0]] = q[i].split('=')[1];
+            }
+            return(results);            
+        }
+
+        var Q = queryFunc();
+
+        function loadData() {
+            var inputname = 'data/summary.json';
+            $.getJSON(inputname,onLoad);
+        }
+
+        function onLoad(data) {
+            alldata = [];
+
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    alldata.push(data[key]);
+                }    
+            }
+            graphLayer1 = drawMagDiff();
+            graphLayer2 = drawMagDist();
+            graphLayer3 = drawTime();
+        }
+
+    function switchData(type) {
+        console.log(type);
+        filtertype = type;    
+        drawMagDiff();
+        drawMagDist();
+    }
+
+       function dirToOptions(data) {
+            $(data).find('a').attr('href',function(i,val) {
+                if (val.match(/\.(geojson)$/)) {
+                    var myid = val.split('.')[1];
+                    if (!val.match(/out/)) { return; } 
+                    var text = '<option value="'+myid+'">'+myid+'</option>';
+                    if (myid == evid) {
+                        text = '<option selected value="'+myid+'">'+myid+'</option>';
+                    }
+                    $('select').append(text);
+                }
+            });
+        }
+
+        function changePage(key,val) {
+            window.location.href = window.location.pathname
+                + "?" + $.param({key:val});
+        }
+
+    </script>
+
+Select events:  
+<button onClick="switchData('all')">All</button>
+<button onClick="switchData('sc')">SoCal</sub></button>
+<button onClick="switchData('nc')">NoCal</sub></button>
+<button onClick="switchData('ca')">Calif</sub></button>
+<button onClick="switchData('ok')">Oklahoma</sub></button>
+
+<div id="graphMagDist"></div>
+<div id="graphMagDiff"></div>
+<div id="graphTime"></div>
+
+   <script>
+        loadData();        
+  </script>
+
+</body>
+

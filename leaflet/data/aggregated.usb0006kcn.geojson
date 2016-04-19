@@ -1,1 +1,1 @@
-{"type": "FeatureCollection", "features": [{"id": "617000 3924000 14 S", "properties": {"_dist": 678.0893, "_mag": 6.83566674646013, "t": 6611, "nresp": 2, "cdi": 2.2, "_wt": 0.1}, "type": "Feature", "geometry": {"type": "Point", "coordinates": [-97.7051, 35.457]}}]}
+{"type": "FeatureCollection", "features": [{"properties": {"_mag": 6.83566674646013, "_dist": 678.0893, "t": 6611, "nresp": 2, "cdi": 2.2, "_wt": 0.1}, "type": "Feature", "geometry": {"coordinates": [-97.7051, 35.457], "type": "Point"}, "id": "617000 3924000 14 S"}]}

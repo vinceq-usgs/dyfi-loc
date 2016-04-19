@@ -1,0 +1,156 @@
+body {
+    font: 12px sans-serif;
+}
+
+// D3 styles
+svg1 {
+  font: 10px sans-serif;
+}
+svg2 {
+  font: 10px sans-serif;
+}
+svg3 {
+  font: 10px sans-serif;
+}
+
+.axis path {
+    fill:none;
+    stroke: black;
+}
+.axis {
+    font-size:8pt;
+    font-family:sans-serif;
+}
+.axis.mag {
+    stroke:red;
+}
+.axis.mag text {
+    stroke:red;
+}
+#originline {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+.tick {
+    fill:none;
+    stroke:black;
+}
+.resid {
+    stroke:black;
+    stroke-width:0.5px;
+    fill:Blue;
+    opacity:1.0;
+    r:5;
+}
+.events {
+    stroke-width:0;
+    fill:blue;
+    opacity:1.0;
+    r:2;
+}
+.median {
+    stroke-width:0;
+    fill:red;
+    opacity:1.0;
+    r:4;
+}
+circle:hover {
+    stroke-width:3.0px;
+    stroke:red;
+}
+.npts {
+    stroke:black;
+    stroke-width:0.5px;
+    fill:black;
+    opacity:0.6;
+    r:3;
+}
+.gridboundary {
+    stroke:blue;
+    stroke-width:3px;
+    fill:none;
+    opacity:0.5;
+}
+path.mag {
+    stroke:red;
+    fill:none;
+}
+path.conf {
+    fill:none;
+    width:3;
+    stroke:black;
+}
+circle.mag {
+    fill:red;
+    stroke:blue;
+    opacity:1.0;
+    r:2;
+}
+circle.epicenterpt {
+    fill:red;
+    stroke:red;
+    r:5;
+}
+.path {
+    fill:none;
+}
+#path_conf_95 {
+    stroke: green;
+}
+#path_conf_90 {
+    stroke: green;
+}
+#path_conf_75 {
+    stroke: orange;
+}
+#path_conf_67 {
+    stroke: orange;
+}
+#path_conf_50 {
+    stroke:red;
+}
+.infoControl {
+    padding: 5px 5px;
+    font: 12px Arial, Helvetica, sans-serif;
+    background: white;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+.legend {
+    line-height: 18px;
+    color: black;
+    background: white;
+    border-radius : 5px;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-left: 8px;
+    margin-right: 8px;
+    opacity: 1.0;
+}
+button {
+  font: 12px sans-serif;
+  border-radius: 8px;
+  height: 24px;
+  background: white;
+    padding: 5px 5px;
+
+}
+.leaflet-bottom.leaflet-left{
+  width: 80%;
+  height: 15%;
+}
+.leaflet-control-container .leaflet-timeline-controls{
+  width: 100%;
+  margin: 1;
+  margin-bottom: 1px;
+  padding: 1px 1px;
+  border-radius: 1px;
+}
+
+
+
