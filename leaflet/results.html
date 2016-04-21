@@ -115,7 +115,6 @@
     <script type="text/javascript">
 
         function summaryToOptions(data) {
-            console.log(data);
             var evids = Object.keys(data);
             var sorted = evids.sort(function(a,b){
                 var anet = data[a].region;
@@ -128,7 +127,6 @@
             });
             for (var i = 0; i < sorted.length; i++) {
                 myid = sorted[i];
-                console.log(myid);
                 var mymag = data[myid].mag;
                 var nresp = data[myid].npts;
                 var text = 'M' + mymag + ' ' + myid + ', ' + nresp + ' responses';
@@ -137,7 +135,6 @@
                 } else {
                     text = '<option value="'+myid+'">'+text+'</option>';
                 }
-                console.log(text);
                 $('select').append(text);
             };
         }
