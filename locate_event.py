@@ -134,22 +134,22 @@ def main():
         iterations += 1
         print('%i: Running otime + %i mins (%i entries in %i locations)...' %
             (iterations,t/60,this_npts,len(this_pts)))
-        locateAndSave(this_pts,t)
+        locateAndSave(evdata,this_pts,t)
 
         lastrun_npts = this_npts
         if args.iterations and iterations >= args.iterations: break
 
     # Add one more solution with ALL entries
 
-    locateAndSave(allpts,args.maxtime + args.interval)
+    locateAndSave(evdata,allpts,args.maxtime + args.interval)
     print(solutions)
     print('Done.')
 
 
-def locateAndSave(raw_pts,t):
+def locateAndSave(initloc,raw_pts,t):
 
     aggregated_pts = aggregate.aggregate(raw_pts,args.utmspan)
-    result = locate_dyfi.locate(aggregated_pts)
+    result = locate_dyfi.locate(initloc,aggregated_pts)
     
     # Copy solution grid and ipe line to leaflet output
 

@@ -39,7 +39,7 @@ GRIDSTEP_INIT = 50
 GRIDSTEP_FINAL = 5
 #TRYLOCATIONF = 0
 
-def locate(obs):
+def locate(initloc,obs):
     """
     Iterate over observations to determine best location
     Returns GeoJSON Feature: epicenter with mag, resid
@@ -53,16 +53,18 @@ def locate(obs):
     else:
         getStartingPt = getStartingPt_simple
 
+    ipe = chooseIpe(initloc)
     initloc = getStartingPt(obs)
     bestloc = initloc
     saveresults = []
 
-    # We need an initial location to figure out which IPE to use.
     # Also run a sanity check on locations
 
-    ipe = chooseIpe(initloc)
     obs = filterObs(obs)
-    
+    print('After filtering, left with ' + str(len(obs)) + ' locs.')
+    initloc = getStartingPt(obs)
+
+    print(initloc)
     global TRYLOCATIONF
     if RESID_TYPE == 'A':
         TRYLOCATIONF = trylocation_A
@@ -107,6 +109,8 @@ def loopGrid(ipe,initloc,obs,gridstep,saveresults):
 
     counter = 0
     bestloc = initloc
+    print('Bestloc is:')
+    print(bestloc)
     bestresid = 9999
 
     xgridrange = [ x * gridstep for x in range(-10,11) ]
@@ -384,6 +388,7 @@ def getipeline(ipe,mag,dists):
 
 def chooseIpe(loc):
     global FILTERBYLOC
+    print(loc)
     lon = loc['geometry']['coordinates'][0]
     print('Got lon:' + str(lon))
     print(loc)
@@ -420,6 +425,8 @@ def filterObs(obs):
     for ob in obs:        
         if FILTERBYLOC(ob):
             newobs.append(ob)
+        else:
+            pass
 
     return newobs
     
