@@ -6,7 +6,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+
     <link rel="stylesheet" type="text/css" href="inc/leaflet.timeline.min.css" />
     <link rel="stylesheet" type="text/css" href="inc/styles.css">
     <link rel="stylesheet" type="text/css" href="inc/leaflet.css">
@@ -14,7 +14,10 @@
 </head>
 
 <body>
+<!--
     <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+-->
+    <script src="inc/leaflet.js"></script>
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
     <script src="http://calvinmetcalf.github.io/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js"></script>
@@ -107,21 +110,36 @@
  
     </script>
 
-    <div id="map" style="width: 700px; height: 700px"></div>
+    <div id="map" style="width: 700px; height: 400px"></div>
 
     <script type="text/javascript">
-        function dirToOptions(data) {
-            $(data).find('a').attr('href',function(i,val) {
-                if (val.match(/\.(geojson)$/)) {
-                    var myid = val.split('.')[1];
-                    if (!val.match(/out/)) { return; } 
-                    var text = '<option value="'+myid+'">'+myid+'</option>';
-                    if (myid == evid) {
-                        text = '<option selected value="'+myid+'">'+myid+'</option>';
-                    }
-                    $('select').append(text);
-                }
+
+        function summaryToOptions(data) {
+            console.log(data);
+            var evids = Object.keys(data);
+            var sorted = evids.sort(function(a,b){
+                var anet = data[a].region;
+                var bnet = data[b].region;
+                if (anet != bnet) {
+                    return anet.localeCompare(bnet);
+                }            
+                return (data[b].npts - data[a].npts); 
+
             });
+            for (var i = 0; i < sorted.length; i++) {
+                myid = sorted[i];
+                console.log(myid);
+                var mymag = data[myid].mag;
+                var nresp = data[myid].npts;
+                var text = 'M' + mymag + ' ' + myid + ', ' + nresp + ' responses';
+                if (myid == evid) {
+                    text = '<option selected value="'+myid+'">'+text+'</option>';
+                } else {
+                    text = '<option value="'+myid+'">'+text+'</option>';
+                }
+                console.log(text);
+                $('select').append(text);
+            };
         }
         function changePage(evid) {
             window.location.href = window.location.pathname
@@ -138,13 +156,15 @@
 
 // This actually loads the directory. You might need to configure
 // your http server to accept this. 
-
-        $(document).ready(function(){
-            $.ajax({
-                url: 'data/',
-                success: function (d){ dirToOptions(d);}
-            });
-        });
+//
+//        $(document).ready(function(){
+//           $.ajax({
+//                url: 'data/',
+//                success: function (d){ dirToOptions(d);}
+//            });
+//        });
+    $.getJSON('data/summary.json',summaryToOptions);
+        
 </script>
     </select>
 </div>
@@ -154,6 +174,7 @@ Select grid color mapping:
 <button onClick="switchGrid('diffmag')">M - M<sub>mean</sub></button>
 
 <div id="graph"></div>
+
 <div id="graphdistance"></div>
 
    <script>

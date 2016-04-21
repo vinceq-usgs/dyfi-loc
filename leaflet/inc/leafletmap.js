@@ -19,8 +19,6 @@ var gridColorsDiffMag = {
 };
 
 var gridColorsResid = {
-//    '3.5' : '#800026',
-//    '0.0' : 'white',
     '0.060' : [ 'white' , '<50%' ],
     '0.047' : [ 'yellow', '67%' ],
     '0.019' : [ 'orange', '80%' ],
@@ -33,11 +31,11 @@ var gridColors = gridColorsResid;
 
 var epicenterIcon = L.icon({
     iconUrl : "images/star.png",
-    iconSize : 16,
+    iconSize : 24,
 });
 
 var solutionMarkerOption = {
-    radius : 4,
+    radius : 5,
     color : 'black',
     weight : 1,
     fillColor : 'blue',                        
@@ -54,7 +52,7 @@ var solutionMarkerOptionHidden = {
 
 
 var gridMarkerOption = {
-    radius : 2,
+    radius : 6,
     color : 'black',
     weight : 1,
     fillColor : 'white',                        
@@ -63,7 +61,7 @@ var gridMarkerOption = {
 
 var solutionMarkerHilight = {
     color : 'red',
-    weight : 4,
+    weight : 5,
 };  
 
 var solpathOption = {
@@ -89,7 +87,7 @@ var solpathOptionHidden = {
 // set up the map
 
         function initmap() {
-            map = new L.Map('map');
+            map = new L.Map('map',{'zoomControl':false});
 
             // create the tile layer with correct attribution
             var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -252,7 +250,7 @@ var solpathOptionHidden = {
             text = "t: " + p.t + " (" + p.npts + " pts)<br>"
                 + "Best magnitude: M" + p.mag + "<br>"
                 + "(" + coords[1] + "," + coords[0] + ")<br>"
-                + "resid: " + p.resid + '<br>'
+                + "resid: " + p.resid + '<br>';
                 + 'Click point to see trial grid'; 
             infoControl.update(text);            
 

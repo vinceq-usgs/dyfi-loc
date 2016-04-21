@@ -45,7 +45,9 @@ function drawResponses() {
     console.log('Drawing ' + responsesdata.features.length + ' points.')
     responsesLayer = L.timeline(responsesdata, {
         getInterval : function(e) {
-            return { start:e.properties.t, end:tlast };
+            var tfirst = e.properties.t;
+            if (tfirst > tlast) { tfirst = tlast; }
+            return { start:tfirst, end:tlast };
         },
         pointToLayer: function(e,latlon) {
             var cdi = parseInt(e.properties.cdi);

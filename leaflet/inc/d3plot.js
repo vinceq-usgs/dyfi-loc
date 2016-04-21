@@ -2,14 +2,14 @@ var svg;
 var selected;
 // Plot functions
 
-var margin = 50,
-    width = 700,
-    height = 250;
 var lineFunc;
 var linePlot;
 var tlast = 1500;
 
 function drawGraph() {
+var margin = 50, 
+    width = 700,
+    height = 250;
 
     // Take out epicenter point
     var data = [];
@@ -118,7 +118,7 @@ function drawGraph() {
         .attr('transform','translate('+(width-margin)+',0)')
         .call(y_axis2).append('text')
         .text('Number of responses')
-        .attr('transform','rotate(90,-10,0) translate(55)');
+        .attr('transform','rotate(90,-10,0) translate(' + (height/2 - margin) + ')');
     svg.append('g')
         .attr('class','y axis mag')
         .attr('transform','translate('+margin+',0)')
